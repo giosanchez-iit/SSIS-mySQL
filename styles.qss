@@ -8,6 +8,7 @@ QWidget {
   QLabel {
     font-family: "Atkinson Hyperlegible"; /* Keep the cute font */
     font-size: 14px;
+    padding-left: 10px
   }
   
   QLineEdit {

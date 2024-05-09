@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QScrollArea
 from PyQt5.QtWidgets import QHBoxLayout, QSpacerItem,QLineEdit, QSizePolicy, QLabel, QLayout
-from gui_box_student import StudentWidget, StudentWidgetHeader
+from gui_box_student import StudentWidget
 from gui_table import StudentTableWidget
 
 class MainWindow(QWidget):
