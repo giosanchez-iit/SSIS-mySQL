@@ -1,0 +1,57 @@
+
+        """
+        # SECOND ROW
+        
+        hLayoutListView = QHBoxLayout()
+        vLayout.addLayout(hLayoutListView)
+
+        mainScrollArea = QScrollArea()
+        mainScrollArea.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        self.vLayoutScrollArea = QVBoxLayout()
+        self.vLayoutScrollArea.setSizeConstraint(QLayout.SetMinimumSize)
+
+        scrollAreaWidgetContents = QWidget()
+        scrollAreaWidgetContents.setLayout(self.vLayoutScrollArea)
+        scrollAreaWidgetContents.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        # Adjust the QScrollArea settings
+        mainScrollArea = QScrollArea()
+        mainScrollArea.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Allow the QScrollArea to expand
+        mainScrollArea.setWidgetResizable(True)  # Ensure the widget inside the QScrollArea can resize
+
+        # Set the QScrollArea to the layout
+        hLayoutListView.addWidget(mainScrollArea)
+        mainScrollArea.setWidget(scrollAreaWidgetContents)        
+        
+        student = StudentWidgetHeader() 
+        # Add the StudentWidget instance to the QVBoxLayout
+        self.vLayoutScrollArea.addWidget(student)
+        
+        # THIRD ROW
+        
+        hLayoutListView = QHBoxLayout()
+        vLayout.addLayout(hLayoutListView)
+
+        mainScrollArea = QScrollArea()
+        mainScrollArea.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        self.vLayoutScrollArea = QVBoxLayout()
+        self.vLayoutScrollArea.setSizeConstraint(QLayout.SetMinimumSize)
+
+        scrollAreaWidgetContents = QWidget()
+        scrollAreaWidgetContents.setLayout(self.vLayoutScrollArea)
+        scrollAreaWidgetContents.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        # Adjust the QScrollArea settings
+        mainScrollArea = QScrollArea()
+        mainScrollArea.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Allow the QScrollArea to expand
+        mainScrollArea.setWidgetResizable(True)  # Ensure the widget inside the QScrollArea can resize
+
+        # Set the QScrollArea to the layout
+        hLayoutListView.addWidget(mainScrollArea)
+        mainScrollArea.setWidget(scrollAreaWidgetContents)        
+        
+        self.add100randomstudents() # FOR TESTING
+        """
+        

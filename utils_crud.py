@@ -90,11 +90,3 @@ class CRUDLClass:
         courses.insert(0, tuple(column_names))
         
         return courses
-
-
-cc = CRUDLClass()
-students = cc.listStudents()
-for student in students:
-    print(student)
-    
-print(cc.readStudent("2022-0000"))
