@@ -31,7 +31,9 @@ class CRUDLClass:
         
     def promptTaskError(self, error):
         print(error)
-        
+      
+    # STUDENTS CRUDL
+      
     def createStudent(self, studentID, studentName, courseID, yearLevel, gender):
         query = f"""INSERT INTO Students VALUES ('{studentID}', '{studentName}', '{courseID}', '{yearLevel}', '{gender}', 0)"""
         self.executeQuery(query)
@@ -40,7 +42,7 @@ class CRUDLClass:
         query = f"""SELECT * FROM Students WHERE StudentID='{studentID}';"""
         self.cursor.execute(query)
         student = self.cursor.fetchall()
-        return student
+        return student[0] if student else None
     
     def updateStudent(self, studentID, studentName, courseID, yearLevel, gender):
         query = f"""UPDATE Students
@@ -56,12 +58,31 @@ class CRUDLClass:
         query = """SELECT * FROM Students;"""
         self.cursor.execute(query)
         students = self.cursor.fetchall()
-        
         column_names = [desc[0] for desc in self.cursor.description]
-
         students.insert(0, tuple(column_names))
-
         return students
+    
+    # STUDENTS HELPER FUNCTIONS
+    
+    def doForEachStudent(self, myFunc, searchItem=None, searchQuery=None):
+        
+        searchItemWithQuery = f""" WHERE {searchItem} LIKE '%{searchQuery}%' """ if (searchItem and searchQuery) else None
+        
+        query = f"""SELECT * FROM Students {searchItemWithQuery} ORDER BY StudentID"""
+        self.cursor.execute(query)
+        students = self.cursor.fetchall()
+        if not students:
+            return
+        for student in students:  # Iterating over 'students' list
+            myFunc(student)
+            
+    def countStudents(self):
+        query = "SELECT COUNT(*) FROM Students;"
+        self.cursor.execute(query)
+        count = self.cursor.fetchall()
+        return int(count[0][0])
+        
+    # COURSE CRUDL
     
     def createCourse(self, courseID, courseDesc):
         query = f"""INSERT INTO Courses VALUES ('{courseID}', '{courseDesc}')"""

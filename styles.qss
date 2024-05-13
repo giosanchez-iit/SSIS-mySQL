@@ -1,58 +1,56 @@
 QWidget {
-    background-color: #f5f5f5; /* Light gray background */
-    border-radius: 8px; /* Rounded corners for all widgets */
-    border-color:#000000;
-    color: #333333; /* Black text color for better readability */
-  }
-  
-  QLabel {
-    font-family: "Atkinson Hyperlegible"; /* Keep the cute font */
-    font-size: 14px;
-    padding-left: 10px
-  }
-  
-  QLineEdit {
-    color: #333333; /* Black text color */
-    background-color: #fff; /* White background */
-    border: 1px solid #000000; /* Black border */
-    border-radius: 20px; /* Rounded corners for input fields */
-    padding-left: 10px; /* Increase left padding */
-    padding-right: 10px; /* Maintain right padding */
-    padding-top: 10px; /* Increase left padding */
-    padding-bottom: 10px; /* Maintain right padding */
-    font-size: 16px; /* Increased font size */
-  }
-  
-  QLineEdit:hover {
-    border-color: #ffff00; /* Yellow border on hover */
-  }
-  
-  QPushButton {
-    color: #333333; /* Black text color */
-    background-color: #fff; /* White background */
-    border: 1px solid #000000; /* Black border */
-    border-radius: 20px; /* Rounded corners for buttons */
-    padding: 10px; /* Adjust padding as needed */
-    font-size: 16px; /* Increased font size */
-  }
-  
-  QPushButton:hover {
-    background-color: #ffff00; /* Yellow background on hover */
-    border-color: #000000; /* Yellow border on hover */
-  }
-  
-  /* Optional styles for QScrollArea (unchanged) */
-  QScrollArea {
-    background-color: #f0f0f0;
-    border-radius: 4px;
-  }
-  
-  QScrollArea:horizontalScrollBar {
-    background-color: #e0e0e0;
-    height: 10px;
-  }
-  
-  QScrollArea:horizontalScrollBar:hover {
-    background-color: #d0d0d0;
-  }
-  
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  border-color:#000000;
+  color: #333333;
+}
+
+QLabel {
+  font-family: "Atkinson Hyperlegible";
+  font-size: 14px;
+  padding-left: 10px;
+}
+
+QLineEdit {
+  color: #333333;
+  background-color: #fff;
+  border: 1px solid #000000;
+  border-radius: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 16px;
+}
+
+QLineEdit:hover {
+  border-color: #ffff00;
+}
+
+QPushButton {
+  color: #333333;
+  background-color: #fff;
+  border: 1px solid #000000;
+  border-radius: 20px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+QPushButton:hover {
+  background-color: #ffff00;
+  border-color: #000000;
+}
+
+QScrollArea {
+  background-color: #f0f0f0;
+  border-radius: 4px;
+}
+
+QScrollArea:horizontalScrollBar {
+  background-color: #e0e0e0;
+  height: 10px;
+}
+
+QScrollArea:horizontalScrollBar:hover {
+  background-color: #d0d0d0;
+}

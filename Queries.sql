@@ -1,5 +1,5 @@
 -- ADD CONSTRAINT check_student_id CHECK (StudentID REGEXP '^\\d{4}-\\d{4}$');
-SELECT * FROM Courses;
+SELECT * FROM Students ORDER BY StudentID ASC LIMIT 1 OFFSET 1;
 /*
 UPDATE Students
 SET StudentID='2022-0026'

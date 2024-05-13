@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QScrollArea
 from PyQt5.QtWidgets import QHBoxLayout, QSpacerItem,QLineEdit, QSizePolicy, QLabel, QLayout
 from gui_box_student import StudentWidget
-from gui_table import StudentTableWidget
+from gui_table import MyTableWidget
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -42,10 +42,8 @@ class MainWindow(QWidget):
         # SECOND ROW
         
         # THIRD ROW
-        hLayoutListView = QHBoxLayout()
-        vLayout.addLayout(hLayoutListView)
-        self.student_table_widget = StudentTableWidget()
-        hLayoutListView.addWidget(self.student_table_widget)
+        my_table_widget = MyTableWidget()
+        vLayout.addWidget(my_table_widget)
         
         # FOURTH ROW
         
@@ -74,15 +72,14 @@ class MainWindow(QWidget):
         
         
 if __name__ == "__main__":
-    
     app = QApplication(sys.argv)
     
     # Set Stylesheet
     with open('styles.qss', 'r') as f:
         styleSheet = f.read()
-    app.setStyleSheet(styleSheet)
-    
-    # Set MainWindow
+
     window = MainWindow()
+    window.setStyleSheet(styleSheet)
+    
     window.show()
     sys.exit(app.exec_())

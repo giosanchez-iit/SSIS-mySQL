@@ -55,3 +55,26 @@
         self.add100randomstudents() # FOR TESTING
         """
         
+----------------------
+       
+    """
+    def __init__(self, parent=None):
+        super(StudentTableWidget, self).__init__(parent)
+        self.init_ui()
+
+    def init_ui(self):
+        cc = CRUDLClass()
+        students = cc.listStudents()
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        self.table_view = QTableView()
+        self.table_view.setSelectionBehavior(QTableView.SelectRows)
+        self.table_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        model = StudentTableModel(students)
+        self.table_view.setModel(model)
+        model = StudentTableModel(students)
+        self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        layout.addWidget(self.table_view)
+        """
