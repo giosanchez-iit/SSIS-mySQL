@@ -1,5 +1,6 @@
 -- ADD CONSTRAINT check_student_id CHECK (StudentID REGEXP '^\\d{4}-\\d{4}$');
-SELECT * FROM Students ORDER BY StudentID ASC LIMIT 1 OFFSET 1;
+use ssisdb;
+INSERT INTO students(studentID, studentName) values ('2022-0863', '') 
 /*
 UPDATE Students
 SET StudentID='2022-0026'

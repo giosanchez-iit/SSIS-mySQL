@@ -1,15 +1,19 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QScrollArea
 from PyQt5.QtWidgets import QHBoxLayout, QSpacerItem,QLineEdit, QSizePolicy, QLabel, QLayout
-from gui_box_student import StudentWidget
+from PyQt5.QtCore import Qt
 from gui_table import MyTableWidget
+from gui_popups import StudentDialog
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.init_ui()
+        self.displayModeIsStudent = True
 
     def init_ui(self):
+        
+        self.setMouseTracking(True)
         
         # WINDOW
         
@@ -29,46 +33,55 @@ class MainWindow(QWidget):
         hLayoutHeader = QHBoxLayout()
         vLayout.addLayout(hLayoutHeader)
         
-        btnDisplayStudents = QPushButton("Display Students")
-        btnDisplayCourses = QPushButton("Display Courses")
-        searchBar = QLineEdit()
-        searchBar.setPlaceholderText("Search...")
+        self.btnToggleDisplay = QPushButton("Display Courses")
+        self.searchBar = QLineEdit()
+        self.searchBar.setPlaceholderText("Search...")
         
-        hLayoutHeader.addWidget(btnDisplayStudents)
-        hLayoutHeader.addWidget(btnDisplayCourses)
+        hLayoutHeader.addWidget(self.btnToggleDisplay)
         hLayoutHeader.addItem(hSpacer)
-        hLayoutHeader.addWidget(searchBar)
+        hLayoutHeader.addWidget(self.searchBar)
         
         # SECOND ROW
         
         # THIRD ROW
-        my_table_widget = MyTableWidget()
-        vLayout.addWidget(my_table_widget)
+        self.my_table_widget = MyTableWidget()
+        vLayout.addWidget(self.my_table_widget)
         
         # FOURTH ROW
         
         hLayoutFooter = QHBoxLayout()
         vLayout.addLayout(hLayoutFooter)
-        labelStatus = QLabel("Status will be displayed here.")
-        btnAddItem = QPushButton("+ Add New Student")
+        self.labelStatus = QLabel("Status will be displayed here.")
+        self.btnAddItem = QPushButton("+ ADD STUDENT")
         
-        hLayoutFooter.addWidget(labelStatus)
+        hLayoutFooter.addWidget(self.labelStatus)
         hLayoutFooter.addItem(hSpacer)
-        hLayoutFooter.addWidget(btnAddItem)
+        hLayoutFooter.addWidget(self.btnAddItem)
         
-    def add100randomstudents(self):
-        for i in range(1, 101):  # Range starts from 1 because we already have student1 and student2
-            studentID = f"0000-{i:04}"  # Format studentID as a 4-digit number
-            studentName = f"Student 00{i}"
-            courseID = f"CSE{i%100}"  # Cycle through courses CSE101, CSE102,..., CSE100
-            yearLevel = i % 10  # Cycle through year levels 1 to 10
-            gender = "Male" if i % 2 == 0 else "Female"  # Alternate between Male and Female
+        # FUNCTIONALITY
+        self.btnAddItem.clicked.connect(self.open_student_dialog)
+        self.btnToggleDisplay.clicked.connect(self.toggle_display)
+        
+        
+    def setStatus(self, message):
+        self.labelStatus.setText(message)
+        
+    def mousePressEvent(self, event):
+        print (self.my_table_widget.countCheckedBoxes())
+        
+    def open_student_dialog(self):
+        dialog = StudentDialog()
+        dialog.exec()
+        
+        
+    def toggle_display(self):
+        self.displayModeIsStudent = not self.displayModeIsStudent
+        self.my_table_widget.setTableContents(self.displayModeIsStudent)
+        if self.displayModeIsStudent:
+            self.searchBar.setText('')
+        
 
-            # Create a new StudentWidget instance
-            student = StudentWidget(studentID, studentName, courseID, yearLevel, gender)
             
-            # Add the StudentWidget instance to the QVBoxLayout
-            self.vLayoutScrollArea.addWidget(student)
         
         
 if __name__ == "__main__":

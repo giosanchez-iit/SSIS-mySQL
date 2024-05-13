@@ -3,7 +3,9 @@ from mysql.connector import errorcode
 
 class CRUDLClass:
     
-    def __init__(self):
+    def __init__(self, success_action = None, failure_action = None):
+        self.success_action = success_action
+        self.failure_action = failure_action
         self.cnx = None
         self.cursor = None
         self.connect()
@@ -16,14 +18,19 @@ class CRUDLClass:
         except mysql.connector.Error as err:
             print("Error connecting to database:", err)
 
-    def executeQuery(self, query):
+    def executeQuery(self, query, success_message=None):
         try:
             self.cursor.execute(query)
             self.cnx.commit()
+            if self.success_action:
+                self.success_action(success_message)
+                pass
             return True
         except mysql.connector.Error as err:
             if err != "Unread result found":
                 self.promptTaskError(f"ERROR:{err}")
+                if self.failure_action:
+                    self.failure_action(f"ERROR:{err}")
             return False
             
     def promptTaskSuccess(self, message):
@@ -36,7 +43,7 @@ class CRUDLClass:
       
     def createStudent(self, studentID, studentName, courseID, yearLevel, gender):
         query = f"""INSERT INTO Students VALUES ('{studentID}', '{studentName}', '{courseID}', '{yearLevel}', '{gender}', 0)"""
-        self.executeQuery(query)
+        self.executeQuery(query, success_message=f"Student {studentName} ({studentID}) Added!")
     
     def readStudent(self, studentID):
         query = f"""SELECT * FROM Students WHERE StudentID='{studentID}';"""
@@ -48,11 +55,13 @@ class CRUDLClass:
         query = f"""UPDATE Students
                     SET StudentName = '{studentName}', CourseID = '{courseID}', YearLevel = {yearLevel}, Gender = '{gender}', IsEnrolled = 0
                     WHERE StudentID = '{studentID}';"""
-        self.executeQuery(query)
+        self.executeQuery(query, success_message=f"Student {studentName} ({studentID}) Updated!")
 
     def deleteStudent(self, studentID):
+        student = self.readStudent(studentID)
+        studentName = student[0][1]
         query = f"""DELETE FROM Students WHERE StudentID='{studentID}';"""
-        self.executeQuery(query)
+        self.executeQuery(query, success_message=f"Student {studentName} ({studentID}) Deleted!")
         
     def listStudents(self):
         query = """SELECT * FROM Students;"""
@@ -75,13 +84,23 @@ class CRUDLClass:
             return
         for student in students:  # Iterating over 'students' list
             myFunc(student)
-            
+    
+        
     def countStudents(self):
         query = "SELECT COUNT(*) FROM Students;"
         self.cursor.execute(query)
         count = self.cursor.fetchall()
         return int(count[0][0])
-        
+    
+    def listStudentKeys(self):
+        query = "SHOW COLUMNS FROM Students;"
+        self.cursor.execute(query)
+        columns = self.cursor.fetchall()
+        column_names = [column[0] for column in columns]
+        return column_names
+    
+    
+    
     # COURSE CRUDL
     
     def createCourse(self, courseID, courseDesc):
@@ -111,3 +130,9 @@ class CRUDLClass:
         courses.insert(0, tuple(column_names))
         
         return courses
+    
+    def listCourseKeys(self):
+        query = "SELECT CourseID FROM Courses"
+        self.cursor.execute(query)
+        courseIDs = self.cursor.fetchall()
+        return courseIDs
