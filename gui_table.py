@@ -29,6 +29,7 @@ class MyTableWidget(QtWidgets.QWidget):
         # Set the first row as the header
         header = (tableContents[0][i] for i in range(columns))
         self.table.setHorizontalHeaderLabels(header)
+        self.table.horizontalHeader().setDefaultAlignment(Qt.AlignLeft)
         
         # Disable the vertical header to remove row numbers
         self.table.verticalHeader().setVisible(False)

@@ -47,10 +47,17 @@ class MainWindow(QWidget):
         hLayoutHeader.addWidget(self.searchCategory)
         
         # SECOND ROW
+
+        self.displayLabel = QLabel("\nNOW DISPLAYING TABLE: STUDENTS")  # Create the label
+        self.displayLabel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.displayLabel.setAlignment(Qt.AlignCenter)
+        vLayout.addWidget(self.displayLabel)  # Add the label to the layout
         
         # THIRD ROW
+        
         self.my_table_widget = MyTableWidget()
         vLayout.addWidget(self.my_table_widget)
+        
         # FOURTH ROW
         
         hLayoutFooter = QHBoxLayout()
@@ -84,9 +91,21 @@ class MainWindow(QWidget):
         self.displayModeIsStudent = not self.displayModeIsStudent
         self.my_table_widget.setTableContents(self.displayModeIsStudent)
         self.searchBar.setText('')
+        self.searchCategory.clear()
         if self.displayModeIsStudent:
-            pass
-        
+            self.btnToggleDisplay.setText('Display Courses')
+            self.searchCategory.addItems(["StudentID", "StudentName", "CourseID", "YearLevel", "Gender", "isEnrolled"])
+            self.setStatus('Now Displaying Students')
+            self.displayLabel.setText("\nNOW DISPLAYING TABLE: STUDENTS")
+            self.btnAddItem.setText("+ ADD STUDENT")
+            self.searchCategory.setCurrentIndex(1)
+        else:
+            self.btnToggleDisplay.setText('Display Students')
+            self.searchCategory.addItems(["CourseID", "CourseDesc"])
+            self.setStatus('Now Displaying Courses')
+            self.displayLabel.setText("\nNOW DISPLAYING TABLE: COURSES")
+            self.btnAddItem.setText("+ ADD COURSE")
+            self.searchCategory.setCurrentIndex(1)
 
             
         
