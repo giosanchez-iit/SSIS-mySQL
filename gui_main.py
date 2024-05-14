@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QScrollArea
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QComboBox
 from PyQt5.QtWidgets import QHBoxLayout, QSpacerItem,QLineEdit, QSizePolicy, QLabel, QLayout
 from PyQt5.QtCore import Qt
 from gui_table import MyTableWidget
@@ -36,17 +36,21 @@ class MainWindow(QWidget):
         self.btnToggleDisplay = QPushButton("Display Courses")
         self.searchBar = QLineEdit()
         self.searchBar.setPlaceholderText("Search...")
+        self.searchCategory = QComboBox(self)
+        self.searchCategory.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.searchCategory.addItems(["StudentID", "StudentName", "CourseID", "YearLevel", "Gender", "isEnrolled"])
+        self.searchCategory.setCurrentIndex(1)
         
         hLayoutHeader.addWidget(self.btnToggleDisplay)
         hLayoutHeader.addItem(hSpacer)
         hLayoutHeader.addWidget(self.searchBar)
+        hLayoutHeader.addWidget(self.searchCategory)
         
         # SECOND ROW
         
         # THIRD ROW
         self.my_table_widget = MyTableWidget()
         vLayout.addWidget(self.my_table_widget)
-        
         # FOURTH ROW
         
         hLayoutFooter = QHBoxLayout()
@@ -58,9 +62,11 @@ class MainWindow(QWidget):
         hLayoutFooter.addItem(hSpacer)
         hLayoutFooter.addWidget(self.btnAddItem)
         
-        # FUNCTIONALITY
+        # FUNCTIONALITY AND SETUP
         self.btnAddItem.clicked.connect(self.open_student_dialog)
         self.btnToggleDisplay.clicked.connect(self.toggle_display)
+        self.my_table_widget.setTableContents(True)
+        
         
         
     def setStatus(self, message):
@@ -77,8 +83,9 @@ class MainWindow(QWidget):
     def toggle_display(self):
         self.displayModeIsStudent = not self.displayModeIsStudent
         self.my_table_widget.setTableContents(self.displayModeIsStudent)
+        self.searchBar.setText('')
         if self.displayModeIsStudent:
-            self.searchBar.setText('')
+            pass
         
 
             

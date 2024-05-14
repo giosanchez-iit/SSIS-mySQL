@@ -60,11 +60,30 @@ QComboBox {
   color: #333333;
   background-color: #fff;
   border: 1px solid #000000;
-  border-radius: 20px;
+  border-radius: 0; /* Make corners not rounded */
   padding: 5px; /* Adjust padding as needed */
   font-size: 16px;
+  min-width: 200px; /* Make it wider */
 }
 
 QComboBox:hover {
   border-color: #ffff00;
+}
+
+/* Customizing the dropdown arrow */
+QComboBox::drop-down {
+  subcontrol-origin: padding;
+  subcontrol-position: right top;
+  width: 30px; /* Adjust width as needed */
+  border: none;
+  border-left-color: #000000; /* Arrow color */
+}
+
+QComboBox::down-arrow {
+  image: url(arrow.png); /* Use a custom arrow image */
+  subcontrol-position: center right;
+  width: 10px; /* Adjust width as needed */
+  height: 10px; /* Adjust height as needed */
+  padding-right: 10%;
+  border: none;
 }

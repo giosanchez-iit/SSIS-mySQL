@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import QSizePolicy, QTableWidget, QTableWidgetItem, QVBoxLa
 from PyQt5.QtCore import Qt
 from utils_crud import CRUDLClass
 from PyQt5.QtGui import QColor
-from PyQt5.QtGui import QColor
 
 class MyTableWidget(QtWidgets.QWidget):
     def __init__(self):
@@ -34,24 +33,17 @@ class MyTableWidget(QtWidgets.QWidget):
         # Disable the vertical header to remove row numbers
         self.table.verticalHeader().setVisible(False)
         
-        for row in range(1, rows):  # Start from 1 since the first row is now the header
-            for col in range(columns):
-                if col == 0:
-                    item = QTableWidgetItem(str(tableContents[row][col]))
-                    item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
-                    item.setCheckState(Qt.CheckState.Unchecked)
-                    self.table.setItem(row-1, col, item)
-                elif col == 5:
-                    item = QTableWidgetItem('Enrolled') if tableContents[row][col] == 1 else QTableWidgetItem('Not Enrolled')
-                    self.table.setItem(row-1, col, item)
-                else:
-                    self.table.setItem(row-1, col, QTableWidgetItem(str(tableContents[row][col])))
+        # Disable manual editing of the table
+        self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        
+        # Call the new method to add students to the table
+        self.addStudentsToTable(tableContents)
         
         self.table.setColumnCount(columns)
         self.table.setRowCount(rows)
         
         for i in range(self.table.columnCount()):
-            if i != 1:
+            if i!= 1:
                 self.table.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
             else:
                 self.table.horizontalHeader().setSectionResizeMode(i, QHeaderView.Stretch)
@@ -114,4 +106,16 @@ class MyTableWidget(QtWidgets.QWidget):
 
         self.checkBoxCount = 0
 
-
+    def addStudentsToTable(self, tableContents):
+        for row in range(1, len(tableContents)):  # Start from 1 since the first row is now the header
+            for col in range(len(tableContents[0])):
+                if col == 0:
+                    item = QTableWidgetItem(str(tableContents[row][col]))
+                    item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+                    item.setCheckState(Qt.CheckState.Unchecked)
+                    self.table.setItem(row-1, col, item)
+                elif col == 5:
+                    item = QTableWidgetItem('Enrolled') if tableContents[row][col] == 1 else QTableWidgetItem('Not Enrolled')
+                    self.table.setItem(row-1, col, item)
+                else:
+                    self.table.setItem(row-1, col, QTableWidgetItem(str(tableContents[row][col])))

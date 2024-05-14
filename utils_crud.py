@@ -1,6 +1,6 @@
 import mysql.connector
 from mysql.connector import errorcode
-
+    
 class CRUDLClass:
     
     def __init__(self, success_action = None, failure_action = None):
