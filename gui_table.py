@@ -75,12 +75,12 @@ class MyTableWidget(QtWidgets.QWidget):
                 for col in range(self.table.columnCount()):
                     self.table.item(row, col).setBackground(QColor(Qt.white))
                     
-    def setTableContents(self, displayModeIsStudent):
+    def setTableContents(self, displayModeIsStudent, searchItem=None, searchQuery=None):
         cc = CRUDLClass()
         if displayModeIsStudent:
-            new_table_contents = cc.listStudents()
+            new_table_contents = cc.listStudents(searchItem, searchQuery)
         else:
-            new_table_contents = cc.listCourses()
+            new_table_contents = cc.listCourses(searchItem, searchQuery)
 
         self.table.clearContents()
         self.table.setRowCount(0)
@@ -106,17 +106,31 @@ class MyTableWidget(QtWidgets.QWidget):
                 self.table.setItem(row, col, table_item)
 
         self.checkBoxCount = 0
-
+    
+    def insertAtBottom(self, studentData):
+        rowPosition = self.table.rowCount()
+        self.table.insertRow(rowPosition)
+        
+        for col, data in enumerate(studentData):
+            if col == 0:
+                table_item = QTableWidgetItem()
+                table_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+                table_item.setCheckState(Qt.CheckState.Unchecked)
+            elif col == 5:
+                table_item = QTableWidgetItem('Not Enrolled') if data == 0 else QTableWidgetItem('Enrolled')
+            else:
+                table_item = QTableWidgetItem(str(data))
+                
+            self.table.setItem(rowPosition, col, table_item)
+        
     def addStudentsToTable(self, tableContents):
         for row in range(1, len(tableContents)):  # Start from 1 since the first row is now the header
-            for col in range(len(tableContents[0])):
-                if col == 0:
-                    item = QTableWidgetItem(str(tableContents[row][col]))
-                    item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
-                    item.setCheckState(Qt.CheckState.Unchecked)
-                    self.table.setItem(row-1, col, item)
-                elif col == 5:
-                    item = QTableWidgetItem('Enrolled') if tableContents[row][col] == 1 else QTableWidgetItem('Not Enrolled')
-                    self.table.setItem(row-1, col, item)
-                else:
-                    self.table.setItem(row-1, col, QTableWidgetItem(str(tableContents[row][col])))
+            self.insertAtBottom(tableContents[row])
+            
+    def setTableContentsThread(self, displayModeIsStudent, searchItem=None, searchQuery=None):
+        def set_table_contents():
+            self.setTableContents(displayModeIsStudent, searchItem, searchQuery)
+        
+        thread = threading.Thread(target=set_table_contents)
+        thread.start()
+

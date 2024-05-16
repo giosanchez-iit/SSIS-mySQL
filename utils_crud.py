@@ -24,13 +24,17 @@ class CRUDLClass:
             self.cnx.commit()
             if self.success_action:
                 self.success_action(success_message)
-                pass
             return True
         except mysql.connector.Error as err:
-            if err != "Unread result found":
-                self.promptTaskError(f"ERROR:{err}")
+            err_str = str(err)
+            if err_str != "Unread result found":
+                # Extract the error prompt after the colon
+                error_parts = err_str.split(":", 1)
+                error_prompt = error_parts[1].strip() if len(error_parts) > 1 else err_str
+                
+                self.promptTaskError(error_prompt)
                 if self.failure_action:
-                    self.failure_action(f"ERROR:{err}")
+                    self.failure_action(error_prompt)
             return False
             
     def promptTaskSuccess(self, message):
@@ -63,8 +67,8 @@ class CRUDLClass:
         query = f"""DELETE FROM Students WHERE StudentID='{studentID}';"""
         self.executeQuery(query, success_message=f"Student {studentName} ({studentID}) Deleted!")
         
-    def listStudents(self):
-        query = """SELECT * FROM Students;"""
+    def listStudents(self, searchItem=None, searchQuery=None):
+        query = f"""SELECT * FROM Students WHERE {searchItem} LIKE '%{searchQuery}%' """ if (searchItem and searchQuery) else """SELECT * FROM Students;"""
         self.cursor.execute(query)
         students = self.cursor.fetchall()
         column_names = [desc[0] for desc in self.cursor.description]
@@ -84,8 +88,7 @@ class CRUDLClass:
             return
         for student in students:  # Iterating over 'students' list
             myFunc(student)
-    
-        
+
     def countStudents(self):
         query = "SELECT COUNT(*) FROM Students;"
         self.cursor.execute(query)
@@ -118,11 +121,13 @@ class CRUDLClass:
         self.executeQuery(query)
         
     def deleteCourse(self, courseID):
-        query = f"""DELETE FROM Courses WHERE CourseID='{courseID}';"""
+        query = f"""UPDATE Students SET CourseID = NULL WHERE CourseID = {courseID};
+                    DELETE FROM Courses WHERE CourseID = {courseID}"""
         self.executeQuery(query)
         
-    def listCourses(self):
-        query = """SELECT * FROM COURSES"""
+    def listCourses(self, searchItem=None, searchQuery=None):
+        query = f"""SELECT * FROM COURSES WHERE {searchItem} LIKE '%{searchQuery}%' """ if (searchItem and searchQuery) else """SELECT * FROM Courses;"""
+        
         self.executeQuery(query)
         courses = self.cursor.fetchall()
         
@@ -136,3 +141,28 @@ class CRUDLClass:
         self.cursor.execute(query)
         courseIDs = self.cursor.fetchall()
         return courseIDs
+    
+    # COURSE HELPER FUNCTIONS
+    
+    def doForEachCourse(self, myFunc, searchItem=None, searchQuery=None):
+        searchItemWithQuery = f""" WHERE {searchItem} LIKE '%{searchQuery}%' """ if (searchItem and searchQuery) else None
+        
+        query = f"""SELECT * FROM Courses {searchItemWithQuery} ORDER BY CourseID"""
+        self.cursor.execute(query)
+        courses = self.cursor.fetchall()
+        if not courses:
+            return
+        for course in courses:
+            myFunc(course)
+
+    def countCourses(self):
+        query = "SELECT COUNT(*) FROM Courses;"
+        self.cursor.execute(query)
+        count = self.cursor.fetchall()
+        return int(count[0][0])
+    
+    def listCourseDescriptions(self):
+        query = "SELECT CourseDesc FROM Courses;"
+        self.cursor.execute(query)
+        descriptions = self.cursor.fetchall()
+        return descriptions

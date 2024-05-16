@@ -26,6 +26,10 @@ class StudentDialog(QDialog):
         self.gender = QComboBox(self)
 
         # Populate combo boxes
+        courseList = []
+        courses = self.crudl_class.listCourses()
+        for course in courses:
+            courseList.append(f"{course[0]} - {course[1]}")
         self.course_id.addItems([str(course[0]) for course in self.crudl_class.listCourseKeys()])
         self.year_level.addItems([str(i) for i in range(1, 6)])
         self.gender.addItems(["Man", "Woman", "Non-Binary", "Other"])
@@ -86,7 +90,10 @@ class StudentDialog(QDialog):
         self.setLayout(layout)
 
     def printError(self, message):
-        self.error_label.setText(message)
+        try:
+            self.error_label.setText(message)
+        except:
+            pass
         
     def submit(self):
         try:

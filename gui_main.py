@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QHBoxLayout, QSpacerItem,QLineEdit, QSizePolicy, QLa
 from PyQt5.QtCore import Qt
 from gui_table import MyTableWidget
 from gui_popups import StudentDialog
+from utils_crud import CRUDLClass
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -12,7 +13,7 @@ class MainWindow(QWidget):
         self.displayModeIsStudent = True
 
     def init_ui(self):
-        
+        self.cc = CRUDLClass()
         self.setMouseTracking(True)
         
         # WINDOW
@@ -73,22 +74,40 @@ class MainWindow(QWidget):
         self.btnAddItem.clicked.connect(self.open_student_dialog)
         self.btnToggleDisplay.clicked.connect(self.toggle_display)
         self.my_table_widget.setTableContents(True)
+        self.searchBar.textChanged.connect(self.searchBarHandler)
+        self.searchCategory.currentIndexChanged.connect(self.searchBarHandler)
         
         
         
     def setStatus(self, message):
         self.labelStatus.setText(message)
         
-    def mousePressEvent(self, event):
-        print (self.my_table_widget.countCheckedBoxes())
-        
     def open_student_dialog(self):
         dialog = StudentDialog()
         dialog.exec()
+         
+    def displayOnlySearched(self):
+        self.my_table_widget.table.clearContents()
+        self.my_table_widget.table.setRowCount(0)
+        if(self.displayModeIsStudent):
+            self.cc.doForEachStudent(self.my_table_widget.insertAtBottom, searchQuery=self.searchBar.text().strip(), searchItem=self.searchCategory.currentText().strip())
+        else:
+            self.cc.doForEachCourse(self.my_table_widget.insertAtBottom, searchQuery=self.searchBar.text().strip(), searchItem=self.searchCategory.currentText().strip())
+            
+    def searchBarHandler(self):
+        try:
+            self.my_table_widget.stop_list_thread()
+        except RuntimeError:
+            pass
         
+        self.my_table_widget.thread.searchItem = self.searchCategory.currentText().strip()
+        self.my_table_widget.thread.searchQuery = self.searchBar.text().strip()
+        self.my_table_widget.thread.displayModeIsStudent = self.displayModeIsStudent
+        self.my_table_widget.start_list_thread()
         
     def toggle_display(self):
         self.displayModeIsStudent = not self.displayModeIsStudent
+        self.my_table_widget.thread.displayModeIsStudent = self.displayModeIsStudent
         self.my_table_widget.setTableContents(self.displayModeIsStudent)
         self.searchBar.setText('')
         self.searchCategory.clear()

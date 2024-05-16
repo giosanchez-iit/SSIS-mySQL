@@ -1,6 +1,8 @@
 -- ADD CONSTRAINT check_student_id CHECK (StudentID REGEXP '^\\d{4}-\\d{4}$');
-use ssisdb;
-INSERT INTO students(studentID, studentName) values ('2022-0863', '') 
+ALTER TABLE courses
+MODIFY COLUMN CourseDesc VARCHAR(64);
+
+
 /*
 UPDATE Students
 SET StudentID='2022-0026'
