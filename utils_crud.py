@@ -14,7 +14,6 @@ class CRUDLClass:
         try:
             self.cnx = mysql.connector.connect(host="127.0.0.1", user="root", password="123", database="ssisdb")
             self.cursor = self.cnx.cursor()
-            print("Connected to MySQL database successfully!")
         except mysql.connector.Error as err:
             print("Error connecting to database:", err)
 
@@ -67,13 +66,34 @@ class CRUDLClass:
         query = f"""DELETE FROM Students WHERE StudentID='{studentID}';"""
         self.executeQuery(query, success_message=f"Student {studentName} ({studentID}) Deleted!")
         
-    def listStudents(self, searchItem=None, searchQuery=None):
-        query = f"""SELECT * FROM Students WHERE {searchItem} LIKE '%{searchQuery}%' """ if (searchItem and searchQuery) else """SELECT * FROM Students;"""
-        self.cursor.execute(query)
+    def listStudents(self, **kwargs):
+        base_query = "SELECT * FROM Students"
+        where_clause = ""
+
+        if kwargs:
+            where_clauses = []
+            for key, value in kwargs.items():
+                if key == 'isEnrolled' and value is not None:
+                    where_clauses.append(f"{key} = {value}")
+                elif (key == 'gender' or key=='courseID') and value:
+                    where_clauses.append(f"{key} = '{value}'")
+                elif value:
+                    where_clauses.append(f"{key} LIKE '%{value}%'")
+            if where_clauses:
+                where_clause = " WHERE " + " AND ".join(where_clauses)
+
+        final_query = base_query + where_clause
+        self.cursor.execute(final_query)
         students = self.cursor.fetchall()
+
+        # Convert the first row of students to column names
         column_names = [desc[0] for desc in self.cursor.description]
         students.insert(0, tuple(column_names))
+
         return students
+
+
+
     
     # STUDENTS HELPER FUNCTIONS
     

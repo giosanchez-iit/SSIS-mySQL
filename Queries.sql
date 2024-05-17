@@ -1,7 +1,6 @@
 -- ADD CONSTRAINT check_student_id CHECK (StudentID REGEXP '^\\d{4}-\\d{4}$');
-ALTER TABLE courses
-MODIFY COLUMN CourseDesc VARCHAR(64);
-
+set ssisdb;
+SELECT * WHERE isEnrolled = 1
 
 /*
 UPDATE Students

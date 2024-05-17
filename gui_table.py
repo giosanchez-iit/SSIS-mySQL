@@ -75,25 +75,26 @@ class MyTableWidget(QtWidgets.QWidget):
                 for col in range(self.table.columnCount()):
                     self.table.item(row, col).setBackground(QColor(Qt.white))
                     
-    def setTableContents(self, displayModeIsStudent, searchItem=None, searchQuery=None):
+    def setTableContents(self, displayModeIsStudent, **kwargs):
         cc = CRUDLClass()
+        
         if displayModeIsStudent:
-            new_table_contents = cc.listStudents(searchItem, searchQuery)
+            new_table_contents = cc.listStudents(**kwargs)
         else:
-            new_table_contents = cc.listCourses(searchItem, searchQuery)
-
+            new_table_contents = cc.listCourses(**kwargs)
+        
         self.table.clearContents()
         self.table.setRowCount(0)
 
         columns = len(new_table_contents[0]) if new_table_contents else 0
-
         self.table.setColumnCount(columns)
+
         self.table.setRowCount(len(new_table_contents) - 1 if new_table_contents else 0)
 
         header = (item for item in new_table_contents[0]) if new_table_contents else []
         self.table.setHorizontalHeaderLabels(header)
 
-        for row, row_data in enumerate(new_table_contents[1:]):
+        for row, row_data in enumerate(new_table_contents[1:], start=1):  # Start from 1 to skip the header row
             for col, item in enumerate(row_data):
                 if col == 0:
                     table_item = QTableWidgetItem(str(item))
@@ -103,10 +104,11 @@ class MyTableWidget(QtWidgets.QWidget):
                     table_item = QTableWidgetItem('Enrolled') if item == 1 else QTableWidgetItem('Not Enrolled')
                 else:
                     table_item = QTableWidgetItem(str(item))
-                self.table.setItem(row, col, table_item)
+                self.table.setItem(row-1, col, table_item)
 
-        self.checkBoxCount = 0
-    
+        self.checkBoxCount = 0  
+
+        
     def insertAtBottom(self, studentData):
         rowPosition = self.table.rowCount()
         self.table.insertRow(rowPosition)
@@ -127,10 +129,3 @@ class MyTableWidget(QtWidgets.QWidget):
         for row in range(1, len(tableContents)):  # Start from 1 since the first row is now the header
             self.insertAtBottom(tableContents[row])
             
-    def setTableContentsThread(self, displayModeIsStudent, searchItem=None, searchQuery=None):
-        def set_table_contents():
-            self.setTableContents(displayModeIsStudent, searchItem, searchQuery)
-        
-        thread = threading.Thread(target=set_table_contents)
-        thread.start()
-

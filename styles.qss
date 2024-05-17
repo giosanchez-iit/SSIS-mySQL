@@ -87,3 +87,17 @@ QComboBox::down-arrow {
   padding-right: 10%;
   border: none;
 }
+
+QComboBox:disabled {
+  color: #d0d0d0; /* Text color for disabled state */
+}
+QComboBox:disabled::drop-down {
+  color:black;
+}
+QComboBox:enabled {
+  color: #000000; /* Text color for disabled state */
+}
+QComboBox:enabled::drop-down {
+  color:black;
+}
+
