@@ -77,12 +77,12 @@ class MyTableWidget(QtWidgets.QWidget):
                     
     def setTableContents(self, displayModeIsStudent, **kwargs):
         cc = CRUDLClass()
-        
+
         if displayModeIsStudent:
             new_table_contents = cc.listStudents(**kwargs)
         else:
             new_table_contents = cc.listCourses(**kwargs)
-        
+
         self.table.clearContents()
         self.table.setRowCount(0)
 
@@ -96,33 +96,25 @@ class MyTableWidget(QtWidgets.QWidget):
 
         for row, row_data in enumerate(new_table_contents[1:], start=1):  # Start from 1 to skip the header row
             for col, item in enumerate(row_data):
-                if col == 0:
+                if displayModeIsStudent and col == 0:
                     table_item = QTableWidgetItem(str(item))
                     table_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
                     table_item.setCheckState(Qt.CheckState.Unchecked)
-                elif col == 5:
+                elif displayModeIsStudent and col == 5:
                     table_item = QTableWidgetItem('Enrolled') if item == 1 else QTableWidgetItem('Not Enrolled')
                 else:
                     table_item = QTableWidgetItem(str(item))
-                self.table.setItem(row-1, col, table_item)
+                self.table.setItem(row - 1, col, table_item)
 
-        self.checkBoxCount = 0  
+        self.checkBoxCount = 0
 
         
-    def insertAtBottom(self, studentData):
+    def insertAtBottom(self, rowData):
         rowPosition = self.table.rowCount()
         self.table.insertRow(rowPosition)
-        
-        for col, data in enumerate(studentData):
-            if col == 0:
-                table_item = QTableWidgetItem()
-                table_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
-                table_item.setCheckState(Qt.CheckState.Unchecked)
-            elif col == 5:
-                table_item = QTableWidgetItem('Not Enrolled') if data == 0 else QTableWidgetItem('Enrolled')
-            else:
-                table_item = QTableWidgetItem(str(data))
-                
+
+        for col, data in enumerate(rowData):
+            table_item = QTableWidgetItem(str(data))
             self.table.setItem(rowPosition, col, table_item)
         
     def addStudentsToTable(self, tableContents):

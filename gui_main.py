@@ -135,12 +135,11 @@ class MainWindow(QWidget):
             self.cc.doForEachCourse(self.my_table_widget.insertAtBottom, searchQuery=self.searchBar.text().strip(), searchItem=self.searchCategory.currentText().strip())
             
     def searchBarHandler(self):
-        
-        self.disablecombobox(self.searchCourse) if self.searchCourse.currentIndex() == 0 else self.enablecombobox(self.searchCourse) 
-        self.disablecombobox(self.searchYearLevel) if self.searchYearLevel.currentIndex() == 0 else self.enablecombobox(self.searchYearLevel) 
-        self.disablecombobox(self.searchGender) if self.searchGender.currentIndex() == 0 else self.enablecombobox(self.searchGender) 
-        self.disablecombobox(self.searchStatus) if self.searchStatus.currentIndex() == 0 else self.enablecombobox(self.searchStatus) 
-            
+        self.disablecombobox(self.searchCourse) if self.searchCourse.currentIndex() == 0 else self.enablecombobox(self.searchCourse)
+        self.disablecombobox(self.searchYearLevel) if self.searchYearLevel.currentIndex() == 0 else self.enablecombobox(self.searchYearLevel)
+        self.disablecombobox(self.searchGender) if self.searchGender.currentIndex() == 0 else self.enablecombobox(self.searchGender)
+        self.disablecombobox(self.searchStatus) if self.searchStatus.currentIndex() == 0 else self.enablecombobox(self.searchStatus)
+
         search_params = {
             'studentID': self.searchBarIDNum.text().strip(),
             'studentName': self.searchBarName.text().strip(),
@@ -149,14 +148,23 @@ class MainWindow(QWidget):
             'gender': self.searchGender.currentText().strip(),
             'isEnrolled': (self.searchStatus.currentIndex() - 1)
         }
+
+        if not self.displayModeIsStudent:
+            search_params = {
+                'searchItem': 'CourseID',
+                'searchQuery': self.searchBarIDNum.text().strip()
+            } if self.searchBarIDNum.text().strip() else {
+                'searchItem': 'CourseDesc',
+                'searchQuery': self.searchBarName.text().strip()
+            }
+
         for key in list(search_params.keys()):  # Convert keys to list to avoid RuntimeError
             if not isinstance(search_params[key], int) and (search_params[key] == '' or search_params[key][:3] == 'No '):
                 del search_params[key]
-            elif isinstance(search_params[key], int) and search_params[key]<0:
+            elif isinstance(search_params[key], int) and search_params[key] < 0:
                 del search_params[key]
 
         self.my_table_widget.setTableContents(self.displayModeIsStudent, **search_params)
-        
         
     def toggle_display(self):
         self.displayModeIsStudent = not self.displayModeIsStudent
