@@ -6,11 +6,10 @@ from utils_crud import CRUDLClass
 class StudentDialog(QDialog):
     dialogClosed = pyqtSignal() 
 
-    def __init__(self, student_id=None, student_name=None, course_id=None, year_level=None, gender=None):
+    def __init__(self, student_id=None, student_name=None, course_id=None, year_level=None, gender=None, multiple = False):
         super().__init__()
         self.setWindowTitle("Student Information")
         self.setGeometry(100, 100, 400, 200)  
-
         with open('styles.qss', 'r') as f:
             stylesheet = f.read()
         self.setStyleSheet(stylesheet)
@@ -25,6 +24,10 @@ class StudentDialog(QDialog):
         self.year_level = QComboBox(self)
         self.gender = QComboBox(self)
 
+        # Make the button ahead
+        self.button = QPushButton("Submit", self)
+        self.button.clicked.connect(self.submit)
+        
         # Populate combo boxes
         courseList = []
         courses = self.crudl_class.listCourses()
@@ -40,15 +43,38 @@ class StudentDialog(QDialog):
         self.year_level.addItems([str(i) for i in range(1, 6)])
         self.gender.addItems(["Man", "Woman", "Non-Binary", "Other"])
 
-        # Set default values and editability based on student ID
-        if student_id:
+        # Set default values and editability based on student ID  
+        if multiple: #edit multiple
+            self.student_id1.setEnabled(False)
+            self.student_id1.setStyleSheet("background-color: lightgray;")
+            self.student_id2.setEnabled(False)
+            self.student_id2.setStyleSheet("background-color: lightgray;")
+            self.student_name.setEnabled(False)
+            self.student_name.setText("-- multiple selected --")
+            self.student_name.setStyleSheet("background-color: lightgray;")
+            self.course_id.setCurrentIndex(-1)
+            self.year_level.setEnabled(False)
+            self.year_level.setCurrentIndex(-1)
+            self.year_level.setStyleSheet("background-color: lightgray;")
+            self.gender.setEnabled(False)
+            self.gender.setCurrentIndex(-1)
+            self.gender.setStyleSheet("background-color: lightgray;") 
+            self.button.setText("Edit All")   
+        elif student_id: #edit
             self.student_id1.setText(student_id[:4])
             self.student_id2.setText(student_id[5:])
             self.student_id1.setEnabled(False)
             self.student_id2.setEnabled(False)
-        else:
+            self.student_id1.setStyleSheet("background-color: lightgray;")
+            self.student_id2.setStyleSheet("background-color: lightgray;") 
+            self.button.setText("Edit")    
+        else: #create
+            self
             self.student_id1.setEnabled(True)
             self.student_id2.setEnabled(True)
+            self.student_id1.setStyleSheet("")
+            self.student_id2.setStyleSheet("")
+            self.button.setText("Create")
 
         if student_name:
             self.student_name.setText(student_name)
@@ -82,9 +108,7 @@ class StudentDialog(QDialog):
         layout.addWidget(self.gender, 4, 1)
 
         # Button
-        button = QPushButton("Submit", self)
-        button.clicked.connect(self.submit)
-        layout.addWidget(button, 6, 0, 1, 2)
+        layout.addWidget(self.button, 6, 0, 1, 2)
         
         # Error Label
         self.error_label = QLabel(self)
@@ -139,6 +163,6 @@ class StudentDialog(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    dialog = StudentDialog(student_id='')
+    dialog = StudentDialog(multiple = False)
     dialog.show()
     sys.exit(app.exec_())
