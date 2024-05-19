@@ -44,26 +44,13 @@ class CRUDLClass:
       
     # STUDENTS CRUDL
       
-    def createStudent(self, studentID, studentName, courseID=None, yearLevel=None, gender=None):
-        query = f"""INSERT INTO Students (studentID, StudentName, CourseID, YearLevel, Gender, isEnrolled) VALUES """
-        query += f"('{studentID}', '{studentName}', "
-        if courseID is not None:
-            query += f"'{courseID}', "
-        else:
-            query += "NULL, "
-
-        if yearLevel is not None:
-            query += f"{yearLevel}, "
-        else:
-            query += "NULL, " 
-
-        if gender is not None:
-            query += f"'{gender}', "
-        else:
-            query += "NULL, " 
-            
-        query += " 0)"
-        self.executeQuery(query, success_message=f"Student {studentName} ({studentID}) Added!")
+    def createStudent(self, studentID, studentName, courseID, yearLevel, gender):
+        courseID = "NULL" if courseID == 'None' else f"'{courseID}'"
+        yearLevel = "NULL" if yearLevel == 'None' or yearLevel == '' else f"{yearLevel}"
+        gender = "NULL" if gender == 'None' or gender == '' else f"'{gender}'"
+        query = f"""INSERT INTO Students (StudentID, StudentName, CourseID, YearLevel, Gender, IsEnrolled)
+                    VALUES ('{studentID}', '{studentName}', {courseID}, {yearLevel}, {gender}, 0);"""
+        self.executeQuery(query, success_message=f"Student {studentName} ({studentID}) Created!")
 
     def readStudent(self, studentID):
         query = f"""SELECT * FROM Students WHERE StudentID='{studentID}';"""
@@ -72,10 +59,14 @@ class CRUDLClass:
         return student[0] if student else None
     
     def updateStudent(self, studentID, studentName, courseID, yearLevel, gender):
-        query = f"""UPDATE Students
-                    SET StudentName = '{studentName}', CourseID = '{courseID}', YearLevel = {yearLevel}, Gender = '{gender}', IsEnrolled = 0
-                    WHERE StudentID = '{studentID}';"""
+        print("before")
+        courseID = "NULL" if courseID == 'None' else f"'{courseID}'"
+        yearLevel = "NULL" if yearLevel == 'None' or yearLevel == '' else f"{yearLevel}"
+        gender = "NULL" if gender == 'None' or gender == '' else f"'{gender}'"
+        query = f"""UPDATE Students SET StudentName = '{studentName}', CourseID = {courseID}, YearLevel = {yearLevel}, Gender = {gender}, IsEnrolled = 0 WHERE StudentID = '{studentID}';"""
+        print(query)
         self.executeQuery(query, success_message=f"Student {studentName} ({studentID}) Updated!")
+        print("after")
 
     def deleteStudent(self, studentID):
         student = self.readStudent(studentID)

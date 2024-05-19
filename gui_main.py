@@ -110,7 +110,7 @@ class MainWindow(QWidget):
         hLayoutFooter.addWidget(self.btnDeleteItem)
         
         # SIGNALS
-        self.btnAddItem.clicked.connect(self.open_student_dialog)
+        self.btnAddItem.clicked.connect(self.open_student_create_dialog)
         self.btnDeleteItem.clicked.connect(self.open_student_delete_dialog)
         self.btnEditItem.clicked.connect(self.open_student_edit_dialog)
         self.my_table_widget.checkBoxCountChanged.connect(self.updateStatusLabel)
@@ -138,7 +138,10 @@ class MainWindow(QWidget):
      
     def open_student_create_dialog(self):
         dialog = StudentDialog()
+        dialog.dialogClosed.connect(self.refreshTable)
+        dialog.formSubmit.connect(self.refreshTable)
         dialog.exec()
+
     
     def open_student_edit_dialog(self):
         selected_students = self.my_table_widget.getCheckedKeys()
@@ -148,10 +151,13 @@ class MainWindow(QWidget):
 
         if len(selected_students) == 1:
             student_id = selected_students[0]
-            dialog = StudentDialog(student_id=student_id)
+            data = self.cc.readStudent(student_id)
+            dialog = StudentDialog(student_id=data[0], student_name=data[1], course_id=data[2], year_level=data[3], gender=data[4])
         else:
-            dialog = StudentDialog(multiple=True)
-            
+            dialog = StudentDialog(multiple=True, student_ids=self.my_table_widget.getCheckedKeys())
+        
+        dialog.dialogClosed.connect(self.refreshTable)
+        dialog.formSubmit.connect(self.refreshTable)
         dialog.exec()
         
     def open_student_delete_dialog(self):
@@ -274,11 +280,6 @@ class MainWindow(QWidget):
                 color: black; /* Dropdown arrow color for disabled state */
             }
         """)
-        
-    def open_student_dialog(self):
-        self.student_dialog = StudentDialog()
-        self.student_dialog.dialogClosed.connect(self.refreshTable)
-        self.student_dialog.exec_()
 
     def refreshTable(self):
         self.searchBarHandler()

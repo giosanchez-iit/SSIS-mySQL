@@ -5,15 +5,16 @@ from utils_crud import CRUDLClass
 
 class StudentDialog(QDialog):
     dialogClosed = pyqtSignal() 
-
-    def __init__(self, student_id=None, student_name=None, course_id=None, year_level=None, gender=None, multiple = False):
+    formSubmit = pyqtSignal()
+    
+    def __init__(self, student_id=None, student_name=None, course_id=None, year_level=None, gender=None, multiple = False, student_ids=None):
         super().__init__()
         self.setWindowTitle("Student Information")
         self.setGeometry(100, 100, 400, 200)  
         with open('styles.qss', 'r') as f:
             stylesheet = f.read()
         self.setStyleSheet(stylesheet)
-
+        
         self.crudl_class = CRUDLClass(failure_action=self.printError, success_action=self.printError)
 
         # Initialize fields as null
@@ -23,7 +24,11 @@ class StudentDialog(QDialog):
         self.course_id = QComboBox(self)
         self.year_level = QComboBox(self)
         self.gender = QComboBox(self)
-
+        self.multiple = multiple
+        self.student_id = student_id
+        self.student_ids = student_ids
+            
+            
         # Make the button ahead
         self.button = QPushButton("Submit", self)
         self.button.clicked.connect(self.submit)
@@ -126,35 +131,23 @@ class StudentDialog(QDialog):
             pass
         
     def submit(self):
-        try:
-            student_id = f"{self.student_id1.text()}-{self.student_id2.text()}"
+        func = self.crudl_class.updateStudent if self.student_id else self.crudl_class.createStudent
+        if self.multiple:
+            count = 0
+            courseID = self.course_id.currentText()
+            for student_id in self.student_ids:
+                data = self.crudl_class.readStudent(student_id)
+                self.crudl_class.updateStudent(data[0], data[1], courseID, data[3], data[4])
+                count += 1
+            self.error_label.setText(f"{count} Students Edited.")
+        else:
+            student_id = self.student_id1.text() + '-' + self.student_id2.text()
             student_name = self.student_name.text()
             course_id = self.course_id.currentText()
             year_level = self.year_level.currentText()
             gender = self.gender.currentText()
-
-            course_id = None if course_id == 'None' else course_id
-            year_level = None if year_level == 'None' else year_level
-            gender = None if gender == 'None' else gender
-
-            if self.student_id1.isEnabled():
-                success = self.crudl_class.createStudent(student_id, student_name, course_id, year_level, gender)
-            else:
-                success = self.crudl_class.updateStudent(student_id, student_name, course_id, year_level, gender)
-
-            if success:
-                message_box = QMessageBox()
-                message_box.setWindowTitle("Success")
-                message_box.setText("Student information saved successfully!")
-                message_box.setStandardButtons(QMessageBox.Ok)
-                message_box.setIcon(QMessageBox.Information)
-                message_box.exec_()
-            else:
-                pass
-        except ValueError as ve:
-            print(f"ValueError: {ve}")  # Catching ValueError specifically for type conversion errors
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")  # Log unexpected errors
+            func(student_id, student_name, course_id, year_level, gender)
+        self.formSubmit.emit()
 
 
     def closeEvent(self, event):
@@ -163,6 +156,6 @@ class StudentDialog(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    dialog = StudentDialog(multiple = False)
+    dialog = StudentDialog(multiple = True)
     dialog.show()
     sys.exit(app.exec_())
