@@ -1,6 +1,6 @@
 -- ADD CONSTRAINT check_student_id CHECK (StudentID REGEXP '^\\d{4}-\\d{4}$');
-UPDATE Students SET CourseID = NULL WHERE CourseID = 'BAHIS';
-DELETE FROM Courses WHERE CourseID = 'BAHIS';
+INSERT INTO Students (studentID, StudentName, CourseID, YearLevel, Gender, isEnrolled) VALUES ('2101-1088', 'John Doe', NULL, 1, 'Male', 0);
+SELECT * FROM STUDENTS WHERE studentID LIKE '21%';
 /*
 UPDATE Students
 SET StudentID='2022-0026'

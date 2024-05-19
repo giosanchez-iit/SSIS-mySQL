@@ -182,7 +182,7 @@ class MainWindow(QWidget):
                 'searchQuery': self.searchBarName.text().strip()
             }
 
-        for key in list(search_params.keys()):  # Convert keys to list to avoid RuntimeError
+        for key in list(search_params.keys()):
             if not isinstance(search_params[key], int) and (search_params[key] == '' or search_params[key][:3] == 'No '):
                 del search_params[key]
             elif isinstance(search_params[key], int) and search_params[key] < 0:
@@ -191,7 +191,7 @@ class MainWindow(QWidget):
         if not search_params:
             self.btnSelectAll.setVisible(False)
             self.btnDeselectAll.setVisible(False)
-        else:
+        elif search_params or not self.displayModeIsStudent:
             self.btnSelectAll.setVisible(True)
             self.btnDeselectAll.setVisible(True)
         self.my_table_widget.setTableContents(self.displayModeIsStudent, **search_params)
@@ -227,6 +227,8 @@ class MainWindow(QWidget):
             self.btnAddItem.setText("+ ADD STUDENT")
             self.btnEditItem.setText("- EDIT STUDENT")
             self.btnDeleteItem.setText("x DELETE STUDENT")
+            self.btnSelectAll.setVisible(True)
+            self.btnDeselectAll.setVisible(True)
         else:
             self.btnToggleDisplay.setText('Display Students')
             self.setStatus('Now Displaying Courses')
@@ -241,7 +243,9 @@ class MainWindow(QWidget):
             self.btnAddItem.setText("+ ADD COURSE")
             self.btnEditItem.setText("- EDIT COURSE")
             self.btnDeleteItem.setText("x DELETE COURSE")
-        self.refreshTable()
+            self.btnSelectAll.setVisible(False)
+            self.btnDeselectAll.setVisible(False)
+        self.searchBarHandler()
             
     def comboboxCourseDisabler(self):
         if self.searchCourse.currentIndex()!= 0 and self.searchStatus.currentIndex() == 1 :

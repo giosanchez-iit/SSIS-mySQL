@@ -44,10 +44,27 @@ class CRUDLClass:
       
     # STUDENTS CRUDL
       
-    def createStudent(self, studentID, studentName, courseID, yearLevel, gender):
-        query = f"""INSERT INTO Students VALUES ('{studentID}', '{studentName}', '{courseID}', '{yearLevel}', '{gender}', 0)"""
+    def createStudent(self, studentID, studentName, courseID=None, yearLevel=None, gender=None):
+        query = f"""INSERT INTO Students (studentID, StudentName, CourseID, YearLevel, Gender, isEnrolled) VALUES """
+        query += f"('{studentID}', '{studentName}', "
+        if courseID is not None:
+            query += f"'{courseID}', "
+        else:
+            query += "NULL, "
+
+        if yearLevel is not None:
+            query += f"{yearLevel}, "
+        else:
+            query += "NULL, " 
+
+        if gender is not None:
+            query += f"'{gender}', "
+        else:
+            query += "NULL, " 
+            
+        query += " 0)"
         self.executeQuery(query, success_message=f"Student {studentName} ({studentID}) Added!")
-    
+
     def readStudent(self, studentID):
         query = f"""SELECT * FROM Students WHERE StudentID='{studentID}';"""
         self.cursor.execute(query)

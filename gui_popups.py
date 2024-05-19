@@ -6,11 +6,10 @@ from utils_crud import CRUDLClass
 class StudentDialog(QDialog):
     dialogClosed = pyqtSignal() 
 
-    def __init__(self, student_id=None, student_name=None, course_id=None, year_level=None, gender=None, multiple=False):
+    def __init__(self, student_id=None, student_name=None, course_id=None, year_level=None, gender=None):
         super().__init__()
         self.setWindowTitle("Student Information")
-        self.setGeometry(100, 100, 400, 200)
-        self.multiple = multiple
+        self.setGeometry(100, 100, 400, 200)  
 
         with open('styles.qss', 'r') as f:
             stylesheet = f.read()
@@ -18,6 +17,7 @@ class StudentDialog(QDialog):
 
         self.crudl_class = CRUDLClass(failure_action=self.printError, success_action=self.printError)
 
+        # Initialize fields as null
         self.student_id1 = QLineEdit(self)
         self.student_id2 = QLineEdit(self)
         self.student_name = QLineEdit(self)
@@ -25,21 +25,27 @@ class StudentDialog(QDialog):
         self.year_level = QComboBox(self)
         self.gender = QComboBox(self)
 
+        # Populate combo boxes
         courseList = []
         courses = self.crudl_class.listCourses()
+        self.course_id.addItem('None')
+        self.year_level.addItem('None')
+        self.gender.addItem('None')
+        self.course_id.setCurrentIndex(0)
+        self.year_level.setCurrentIndex(0)
+        self.gender.setCurrentIndex(0)
         for course in courses:
             courseList.append(f"{course[0]} - {course[1]}")
         self.course_id.addItems([str(course[0]) for course in self.crudl_class.listCourseKeys()])
         self.year_level.addItems([str(i) for i in range(1, 6)])
         self.gender.addItems(["Man", "Woman", "Non-Binary", "Other"])
 
-        if multiple:
-            pass
+        # Set default values and editability based on student ID
         if student_id:
             self.student_id1.setText(student_id[:4])
             self.student_id2.setText(student_id[5:])
-            self.student_id1.setReadOnly(True)
-            self.student_id2.setEnabled(True)
+            self.student_id1.setEnabled(False)
+            self.student_id2.setEnabled(False)
         else:
             self.student_id1.setEnabled(True)
             self.student_id2.setEnabled(True)
@@ -100,8 +106,12 @@ class StudentDialog(QDialog):
             student_id = f"{self.student_id1.text()}-{self.student_id2.text()}"
             student_name = self.student_name.text()
             course_id = self.course_id.currentText()
-            year_level = int(self.year_level.currentText())
+            year_level = self.year_level.currentText()
             gender = self.gender.currentText()
+
+            course_id = None if course_id == 'None' else course_id
+            year_level = None if year_level == 'None' else year_level
+            gender = None if gender == 'None' else gender
 
             if self.student_id1.isEnabled():
                 success = self.crudl_class.createStudent(student_id, student_name, course_id, year_level, gender)
@@ -117,8 +127,11 @@ class StudentDialog(QDialog):
                 message_box.exec_()
             else:
                 pass
+        except ValueError as ve:
+            print(f"ValueError: {ve}")  # Catching ValueError specifically for type conversion errors
         except Exception as e:
-            pass
+            print(f"An unexpected error occurred: {e}")  # Log unexpected errors
+
 
     def closeEvent(self, event):
         self.dialogClosed.emit() 
@@ -126,6 +139,6 @@ class StudentDialog(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    dialog = StudentDialog(student_id='', student_name="John Doe", course_id="Course 1", year_level=1, gender="Man")
+    dialog = StudentDialog(student_id='')
     dialog.show()
     sys.exit(app.exec_())
