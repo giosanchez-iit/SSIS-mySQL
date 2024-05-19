@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QComboBox, QCompleter
-from PyQt5.QtWidgets import QHBoxLayout, QSpacerItem,QLineEdit, QSizePolicy, QLabel, QLayout
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QHBoxLayout, QSpacerItem,QLineEdit, QSizePolicy, QLabel, QFrame
+from PyQt5.QtCore import Qt, QRect
 from gui_table import MyTableWidget
 from gui_popups import StudentDialog
 from utils_crud import CRUDLClass
@@ -11,6 +11,7 @@ class MainWindow(QWidget):
         super().__init__()
         self.init_ui()
         self.displayModeIsStudent = True
+        self.student_dialog = None
 
     def init_ui(self):
         self.cc = CRUDLClass()
@@ -76,11 +77,11 @@ class MainWindow(QWidget):
         hLayoutHeader.addWidget(self.searchStatus)
         
         # SECOND ROW
-
+        
         self.displayLabel = QLabel("\nNOW DISPLAYING TABLE: STUDENTS")  # Create the label
         self.displayLabel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.displayLabel.setAlignment(Qt.AlignCenter)
-        vLayout.addWidget(self.displayLabel)  # Add the label to the layout
+        vLayout.addWidget(self.displayLabel)
         
         # THIRD ROW
         
@@ -92,18 +93,31 @@ class MainWindow(QWidget):
         hLayoutFooter = QHBoxLayout()
         vLayout.addLayout(hLayoutFooter)
         self.labelStatus = QLabel("Status will be displayed here.")
+        self.btnDeselectAll = QPushButton("DESELECT ALL DISPLAYED")
+        self.btnSelectAll = QPushButton("SELECT ALL DISPLAYED")
         self.btnAddItem = QPushButton("+ ADD STUDENT")
         self.btnEditItem = QPushButton("- EDIT STUDENT")
         self.btnDeleteItem = QPushButton("x DELETE STUDENT")
         
         hLayoutFooter.addWidget(self.labelStatus)
         hLayoutFooter.addItem(hSpacer)
+        hLayoutFooter.addWidget(self.btnDeselectAll)
+        self.btnDeselectAll.setVisible(False)
+        hLayoutFooter.addWidget(self.btnSelectAll)
+        self.btnSelectAll.setVisible(False)
         hLayoutFooter.addWidget(self.btnAddItem)
         hLayoutFooter.addWidget(self.btnEditItem)
         hLayoutFooter.addWidget(self.btnDeleteItem)
         
-        # FUNCTIONALITY AND SETUP
+        # SIGNALS
         self.btnAddItem.clicked.connect(self.open_student_dialog)
+        self.btnDeleteItem.clicked.connect(self.open_student_delete_dialog)
+        self.btnEditItem.clicked.connect(self.open_student_edit_dialog)
+        self.my_table_widget.checkBoxCountChanged.connect(self.updateStatusLabel)
+        self.btnDeselectAll.clicked.connect(lambda: self.my_table_widget.checkAllDisplayed(False))
+        self.btnSelectAll.clicked.connect(lambda: self.my_table_widget.checkAllDisplayed(True))
+        
+        # FUNCTIONALITY AND SETUP
         self.btnToggleDisplay.clicked.connect(self.toggle_display)
         self.my_table_widget.setTableContents(True)
         self.searchBarName.textChanged.connect(self.searchBarHandler)
@@ -121,19 +135,29 @@ class MainWindow(QWidget):
         
     def setStatus(self, message):
         self.labelStatus.setText(message)
-        
-    def open_student_dialog(self):
+     
+    def open_student_create_dialog(self):
         dialog = StudentDialog()
         dialog.exec()
-         
-    def displayOnlySearched(self):
-        self.my_table_widget.table.clearContents()
-        self.my_table_widget.table.setRowCount(0)
-        if(self.displayModeIsStudent):
-            self.cc.doForEachStudent(self.my_table_widget.insertAtBottom, searchQuery=self.searchBar.text().strip(), searchItem=self.searchCategory.currentText().strip())
+    
+    def open_student_edit_dialog(self):
+        selected_students = self.my_table_widget.getCheckedKeys()
+        if not selected_students:
+            self.setStatus("No students selected")
+            return
+
+        if len(selected_students) == 1:
+            student_id = selected_students[0]
+            dialog = StudentDialog(student_id=student_id)
         else:
-            self.cc.doForEachCourse(self.my_table_widget.insertAtBottom, searchQuery=self.searchBar.text().strip(), searchItem=self.searchCategory.currentText().strip())
+            dialog = StudentDialog(multiple=True)
             
+        dialog.exec()
+        
+    def open_student_delete_dialog(self):
+        self.setStatus(self.my_table_widget.deleteSelectedItems(self.displayModeIsStudent))
+        self.refreshTable()
+
     def searchBarHandler(self):
         self.disablecombobox(self.searchCourse) if self.searchCourse.currentIndex() == 0 else self.enablecombobox(self.searchCourse)
         self.disablecombobox(self.searchYearLevel) if self.searchYearLevel.currentIndex() == 0 else self.enablecombobox(self.searchYearLevel)
@@ -164,6 +188,12 @@ class MainWindow(QWidget):
             elif isinstance(search_params[key], int) and search_params[key] < 0:
                 del search_params[key]
 
+        if not search_params:
+            self.btnSelectAll.setVisible(False)
+            self.btnDeselectAll.setVisible(False)
+        else:
+            self.btnSelectAll.setVisible(True)
+            self.btnDeselectAll.setVisible(True)
         self.my_table_widget.setTableContents(self.displayModeIsStudent, **search_params)
         
     def toggle_display(self):
@@ -178,7 +208,13 @@ class MainWindow(QWidget):
         self.searchCourse.clear()
         if self.displayModeIsStudent:
             self.btnToggleDisplay.setText('Display Courses')
-            self.searchCourse.addItems(["No Course Specified", "StudentID", "StudentName", "CourseID", "YearLevel", "Gender", "isEnrolled"])
+            courses = self.cc.listCourses()
+            courseList = []
+            courseList.append("No Course Specified")
+            for course in courses:
+                courseList.append(f"{course[0]}")
+            courseList.pop(1) 
+            self.searchCourse.addItems(courseList)
             self.setStatus('Now Displaying Students')
             self.displayLabel.setText("\nNOW DISPLAYING TABLE: STUDENTS")
             self.btnAddItem.setText("+ ADD STUDENT")
@@ -204,6 +240,8 @@ class MainWindow(QWidget):
             self.searchStatus.setVisible(False)
             self.btnAddItem.setText("+ ADD COURSE")
             self.btnEditItem.setText("- EDIT COURSE")
+            self.btnDeleteItem.setText("x DELETE COURSE")
+        self.refreshTable()
             
     def comboboxCourseDisabler(self):
         if self.searchCourse.currentIndex()!= 0 and self.searchStatus.currentIndex() == 1 :
@@ -232,8 +270,27 @@ class MainWindow(QWidget):
                 color: black; /* Dropdown arrow color for disabled state */
             }
         """)
+        
+    def open_student_dialog(self):
+        self.student_dialog = StudentDialog()
+        self.student_dialog.dialogClosed.connect(self.refreshTable)
+        self.student_dialog.exec_()
 
-            
+    def refreshTable(self):
+        self.searchBarHandler()
+        
+    def updateStatusLabel(self, count):
+        count = self.my_table_widget.countCheckedBoxes()
+        if count == 0:
+            self.setStatus("No items selected")
+        elif count == 1:
+            item_type = "student" if self.displayModeIsStudent else "course"
+            self.setStatus(f"1 {item_type} selected")
+        else:
+            item_type = "students" if self.displayModeIsStudent else "courses"
+            self.setStatus(f"{count} {item_type} selected")
+
+                
         
         
 if __name__ == "__main__":

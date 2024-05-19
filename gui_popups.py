@@ -6,10 +6,11 @@ from utils_crud import CRUDLClass
 class StudentDialog(QDialog):
     dialogClosed = pyqtSignal() 
 
-    def __init__(self, student_id=None, student_name=None, course_id=None, year_level=None, gender=None):
+    def __init__(self, student_id=None, student_name=None, course_id=None, year_level=None, gender=None, multiple=False):
         super().__init__()
         self.setWindowTitle("Student Information")
-        self.setGeometry(100, 100, 400, 200)  
+        self.setGeometry(100, 100, 400, 200)
+        self.multiple = multiple
 
         with open('styles.qss', 'r') as f:
             stylesheet = f.read()
@@ -17,7 +18,6 @@ class StudentDialog(QDialog):
 
         self.crudl_class = CRUDLClass(failure_action=self.printError, success_action=self.printError)
 
-        # Initialize fields as null
         self.student_id1 = QLineEdit(self)
         self.student_id2 = QLineEdit(self)
         self.student_name = QLineEdit(self)
@@ -25,7 +25,6 @@ class StudentDialog(QDialog):
         self.year_level = QComboBox(self)
         self.gender = QComboBox(self)
 
-        # Populate combo boxes
         courseList = []
         courses = self.crudl_class.listCourses()
         for course in courses:
@@ -34,12 +33,13 @@ class StudentDialog(QDialog):
         self.year_level.addItems([str(i) for i in range(1, 6)])
         self.gender.addItems(["Man", "Woman", "Non-Binary", "Other"])
 
-        # Set default values and editability based on student ID
+        if multiple:
+            pass
         if student_id:
             self.student_id1.setText(student_id[:4])
             self.student_id2.setText(student_id[5:])
-            self.student_id1.setEnabled(False)
-            self.student_id2.setEnabled(False)
+            self.student_id1.setReadOnly(True)
+            self.student_id2.setEnabled(True)
         else:
             self.student_id1.setEnabled(True)
             self.student_id2.setEnabled(True)

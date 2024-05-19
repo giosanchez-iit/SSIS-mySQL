@@ -1,5 +1,7 @@
 from utils_crud import CRUDLClass as cc
-
 mycc = cc()
 
-print(mycc.listStudents(isEnrolled = 0))
+func = mycc.readStudent
+
+mine = func('2022-0025')[1]
+print(mine)

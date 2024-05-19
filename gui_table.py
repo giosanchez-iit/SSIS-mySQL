@@ -1,11 +1,12 @@
 import sys
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QSizePolicy, QTableWidget, QTableWidgetItem, QVBoxLayout, QHeaderView
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QSizePolicy, QTableWidget, QTableWidgetItem, QVBoxLayout, QHeaderView, QMessageBox, QScrollArea, QWidget, QLabel
+from PyQt5.QtCore import Qt, pyqtSignal
 from utils_crud import CRUDLClass
 from PyQt5.QtGui import QColor
 
 class MyTableWidget(QtWidgets.QWidget):
+    checkBoxCountChanged = pyqtSignal(int)
     def __init__(self):
         super().__init__()
         self.setMouseTracking(True)
@@ -74,6 +75,7 @@ class MyTableWidget(QtWidgets.QWidget):
             else:
                 for col in range(self.table.columnCount()):
                     self.table.item(row, col).setBackground(QColor(Qt.white))
+            self.checkBoxCountChanged.emit(self.checkBoxCount)
                     
     def setTableContents(self, displayModeIsStudent, **kwargs):
         cc = CRUDLClass()
@@ -88,26 +90,23 @@ class MyTableWidget(QtWidgets.QWidget):
 
         columns = len(new_table_contents[0]) if new_table_contents else 0
         self.table.setColumnCount(columns)
-
         self.table.setRowCount(len(new_table_contents) - 1 if new_table_contents else 0)
-
-        header = (item for item in new_table_contents[0]) if new_table_contents else []
+        
+        header = tuple(new_table_contents[0])
         self.table.setHorizontalHeaderLabels(header)
-
-        for row, row_data in enumerate(new_table_contents[1:], start=1):  # Start from 1 to skip the header row
+        for row, row_data in enumerate(new_table_contents[1:], start=1): 
             for col, item in enumerate(row_data):
-                if displayModeIsStudent and col == 0:
-                    table_item = QTableWidgetItem(str(item))
-                    table_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
-                    table_item.setCheckState(Qt.CheckState.Unchecked)
-                elif displayModeIsStudent and col == 5:
+                if col == 0:
+                        table_item = QTableWidgetItem(str(item))
+                        table_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+                        table_item.setCheckState(Qt.CheckState.Unchecked)
+                elif col == 5:
                     table_item = QTableWidgetItem('Enrolled') if item == 1 else QTableWidgetItem('Not Enrolled')
                 else:
                     table_item = QTableWidgetItem(str(item))
                 self.table.setItem(row - 1, col, table_item)
 
         self.checkBoxCount = 0
-
         
     def insertAtBottom(self, rowData):
         rowPosition = self.table.rowCount()
@@ -121,3 +120,58 @@ class MyTableWidget(QtWidgets.QWidget):
         for row in range(1, len(tableContents)):  # Start from 1 since the first row is now the header
             self.insertAtBottom(tableContents[row])
             
+    def getCheckedKeys(self):
+        checked_keys = []
+        for row in range(self.table.rowCount()):
+            item = self.table.item(row, 0)
+            if item is not None and item.checkState() == Qt.Checked:
+                checked_keys.append(item.text())
+        return checked_keys
+    
+    def deleteSelectedItems(self, displayModeIsStudent):
+        checked_keys = self.getCheckedKeys()
+        cc = CRUDLClass()
+        itemsDeleted = 0
+        tableDeletedFrom = "student" if displayModeIsStudent else "course"
+
+        if not checked_keys:
+            return f"No {tableDeletedFrom} selected."
+
+        # Create a confirmation dialog
+        msgBox = QMessageBox()
+        msgBox.setWindowTitle("Confirmation Required")
+
+        # Create a scroll area and a widget to hold the labels
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+
+        deletemsg = 'Are you sure you want to delete the following:'
+        func = cc.readStudent if displayModeIsStudent else cc.readCourse
+        for key in checked_keys:
+            item_label = QLabel(f"{func(key)[0]} - {func(key)[1]}")
+            scroll_layout.addWidget(item_label)
+
+        scroll_widget.setLayout(scroll_layout)
+        scroll_area.setWidget(scroll_widget)
+
+        # Add the scroll area to the message box
+        msgBox.layout().addWidget(QLabel(deletemsg), 0, 0)
+        msgBox.layout().addWidget(scroll_area, 1, 0)
+
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msgBox.setDefaultButton(QMessageBox.No)
+
+        # Show the dialog and check the result
+        reply = msgBox.exec_()
+        if reply != QMessageBox.Yes:
+            return "Deletion cancelled by user."
+    
+    def checkAllDisplayed(self, toCheck):
+        for row in range(self.table.rowCount()):
+            item = self.table.item(row, 0)
+            if item is not None:
+                item.setCheckState(Qt.Checked) if toCheck else item.setCheckState(Qt.CheckState.Unchecked)
+                self.highlightRow(item)
+        self.checkBoxCountChanged.emit(self.table.rowCount())

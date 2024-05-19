@@ -141,9 +141,11 @@ class CRUDLClass:
         self.executeQuery(query)
         
     def deleteCourse(self, courseID):
-        query = f"""UPDATE Students SET CourseID = NULL WHERE CourseID = {courseID};
-                    DELETE FROM Courses WHERE CourseID = {courseID}"""
-        self.executeQuery(query)
+        query = f"UPDATE Students SET CourseID = NULL WHERE CourseID = '{courseID}';"
+        self.executeQuery(query)      
+        query = f"DELETE FROM Courses WHERE CourseID = '{courseID}';"
+        self.executeQuery(query)   
+        
         
     def listCourses(self, searchItem=None, searchQuery=None):
         query = f"""SELECT * FROM COURSES WHERE {searchItem} LIKE '%{searchQuery}%' """ if (searchItem and searchQuery) else """SELECT * FROM Courses;"""

@@ -1,7 +1,6 @@
 -- ADD CONSTRAINT check_student_id CHECK (StudentID REGEXP '^\\d{4}-\\d{4}$');
-set ssisdb;
-SELECT * WHERE isEnrolled = 1
-
+UPDATE Students SET CourseID = NULL WHERE CourseID = 'BAHIS';
+DELETE FROM Courses WHERE CourseID = 'BAHIS';
 /*
 UPDATE Students
 SET StudentID='2022-0026'
