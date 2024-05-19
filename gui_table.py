@@ -167,6 +167,20 @@ class MyTableWidget(QtWidgets.QWidget):
         reply = msgBox.exec_()
         if reply != QMessageBox.Yes:
             return "Deletion cancelled by user."
+
+        if displayModeIsStudent:
+            for student_id in checked_keys:
+                itemsDeleted += 1
+                cc.deleteStudent(student_id)
+        else:
+            for course_id in checked_keys:
+                itemsDeleted += 1
+                cc.deleteCourse(course_id)
+
+        plural = 's' if itemsDeleted > 1 else ''
+
+        self.setTableContents(displayModeIsStudent)
+        return f"{itemsDeleted} {tableDeletedFrom}{plural} deleted."
     
     def checkAllDisplayed(self, toCheck):
         for row in range(self.table.rowCount()):
