@@ -170,12 +170,12 @@ class MainWindow(QWidget):
         self.searchCourse.clear()
         if self.displayModeIsStudent:
             self.btnToggleDisplay.setText('Display Courses')
-            self.searchCourse.addItems(["StudentID", "StudentName", "CourseID", "YearLevel", "Gender", "isEnrolled"])
+            self.searchCourse.addItems(["No Course Specified", "StudentID", "StudentName", "CourseID", "YearLevel", "Gender", "isEnrolled"])
             self.setStatus('Now Displaying Students')
             self.displayLabel.setText("\nNOW DISPLAYING TABLE: STUDENTS")
             self.btnAddItem.setText("+ ADD STUDENT")
-            self.searchBarName.setPlaceholderText("Search ID Number...")
-            self.searchBarIDNum.setPlaceholderText("Search Student Name...")
+            self.searchBarName.setPlaceholderText("Search Student Name...")
+            self.searchBarIDNum.setPlaceholderText("Search ID Number...")
             self.searchCourse.setVisible(True)
             self.searchYearLevel.setVisible(True)
             self.searchGender.setVisible(True)
@@ -188,15 +188,14 @@ class MainWindow(QWidget):
             self.setStatus('Now Displaying Courses')
             self.displayLabel.setText("\nNOW DISPLAYING TABLE: COURSES")
             self.btnAddItem.setText("+ ADD COURSE")
-            self.searchBarName.setPlaceholderText("Search Course Code...")
-            self.searchBarIDNum.setPlaceholderText("Search Course Description...")
+            self.searchBarName.setPlaceholderText("Search Course Description...")
+            self.searchBarIDNum.setPlaceholderText("Search Course Code...")
             self.searchCourse.setVisible(False)
             self.searchYearLevel.setVisible(False)
             self.searchGender.setVisible(False)
             self.searchStatus.setVisible(False)
             self.btnAddItem.setText("+ ADD COURSE")
             self.btnEditItem.setText("- EDIT COURSE")
-            self.btnDeleteItem.setText("x DELETE COURSE")
             
     def comboboxCourseDisabler(self):
         if self.searchCourse.currentIndex()!= 0 and self.searchStatus.currentIndex() == 1 :
