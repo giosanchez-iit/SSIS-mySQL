@@ -194,17 +194,18 @@ class MainWindow(QWidget):
             elif isinstance(search_params[key], int) and search_params[key] < 0:
                 del search_params[key]
 
-        if not search_params:
+        
+        if not search_params or not self.displayModeIsStudent:
             self.btnSelectAll.setVisible(False)
             self.btnDeselectAll.setVisible(False)
-        elif search_params or not self.displayModeIsStudent:
+        elif search_params:
             self.btnSelectAll.setVisible(True)
             self.btnDeselectAll.setVisible(True)
         self.my_table_widget.setTableContents(self.displayModeIsStudent, **search_params)
+        self.updateStatusLabel()
         
     def toggle_display(self):
         self.displayModeIsStudent = not self.displayModeIsStudent
-        self.my_table_widget.setTableContents(self.displayModeIsStudent)
         self.searchBarName.setText('')
         self.searchBarIDNum.setText('')
         self.searchCourse.setCurrentIndex(0)
@@ -284,16 +285,35 @@ class MainWindow(QWidget):
     def refreshTable(self):
         self.searchBarHandler()
         
-    def updateStatusLabel(self, count):
+    def updateStatusLabel(self):
         count = self.my_table_widget.countCheckedBoxes()
         if count == 0:
+            item_type = "student" if self.displayModeIsStudent else "course"
             self.setStatus("No items selected")
+            self.btnEditItem.setText(f"- EDIT {item_type.upper()}")
+            self.btnEditItem.setStyleSheet("background-color: lightgray;")
+            self.btnEditItem.setEnabled(False)
+            self.btnDeleteItem.setText(f"x DELETE {item_type.upper()}")
+            self.btnDeleteItem.setStyleSheet("background-color: lightgray;")
+            self.btnDeleteItem.setEnabled(False)
         elif count == 1:
             item_type = "student" if self.displayModeIsStudent else "course"
             self.setStatus(f"1 {item_type} selected")
+            self.btnEditItem.setText(f"- EDIT {item_type.upper()}")
+            self.btnEditItem.setStyleSheet("")
+            self.btnEditItem.setEnabled(True)
+            self.btnDeleteItem.setText(f"x DELETE {item_type.upper()}")
+            self.btnDeleteItem.setStyleSheet("")
+            self.btnDeleteItem.setEnabled(True)
         else:
             item_type = "students" if self.displayModeIsStudent else "courses"
             self.setStatus(f"{count} {item_type} selected")
+            self.btnEditItem.setText(f"- EDIT {item_type.upper()}")
+            self.btnEditItem.setStyleSheet("")
+            self.btnEditItem.setEnabled(True)
+            self.btnDeleteItem.setText(f"x DELETE {item_type.upper()}")
+            self.btnDeleteItem.setStyleSheet("")
+            self.btnDeleteItem.setEnabled(True)
 
                 
         
