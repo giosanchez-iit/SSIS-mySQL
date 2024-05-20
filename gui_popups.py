@@ -15,7 +15,7 @@ class StudentDialog(QDialog):
             stylesheet = f.read()
         self.setStyleSheet(stylesheet)
         
-        self.crudl_class = CRUDLClass(failure_action=self.printError, success_action=self.printError)
+        self.crudl_class = CRUDLClass(failure_action=self.printError, success_action=self.printSuccess)
 
         # Initialize fields as null
         self.student_id1 = QLineEdit(self)
@@ -124,6 +124,20 @@ class StudentDialog(QDialog):
 
         self.setLayout(layout)
 
+    def printSuccess(self, message):
+        try:
+            self.error_label.setText(message)
+        except:
+            pass
+        self.student_id1.clear()
+        self.student_id2.clear()
+        self.student_name.clear()
+        self.gender.setCurrentIndex(0)
+        self.course_id.setCurrentIndex(0)
+        self.year_level.setCurrentIndex(0)
+        self.gender.setCurrentIndex(0)
+        self.formSubmit.emit()
+        
     def printError(self, message):
         try:
             self.error_label.setText(message)
@@ -147,7 +161,6 @@ class StudentDialog(QDialog):
             year_level = self.year_level.currentText()
             gender = self.gender.currentText()
             func(student_id, student_name, course_id, year_level, gender)
-        self.formSubmit.emit()
 
 
     def closeEvent(self, event):
@@ -168,7 +181,7 @@ class CourseDialog(QDialog):
         self.setStyleSheet(stylesheet)
 
         self.idIsEnabled = True if course_id else False
-        self.crudl_class = CRUDLClass(failure_action=self.printError, success_action=self.printError)
+        self.crudl_class = CRUDLClass(failure_action=self.printError, success_action=self.printSuccess)
 
         # Initialize fields as null
         self.course_id = QLineEdit(self)
@@ -211,6 +224,14 @@ class CourseDialog(QDialog):
 
         self.setLayout(layout)
 
+    def printSuccess(self, message):
+        try:
+            self.error_label.setText(message)
+        except:
+            pass
+        self.course_id.clear()
+        self.course_desc.clear()
+        
     def printError(self, message):
         try:
             self.error_label.setText(message)

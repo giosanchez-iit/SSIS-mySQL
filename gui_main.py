@@ -76,6 +76,9 @@ class MainWindow(QWidget):
         hLayoutHeader.addWidget(self.searchGender)
         hLayoutHeader.addWidget(self.searchStatus)
         
+        self.btnClearSearch = QPushButton("CLEAR")
+        hLayoutHeader.addWidget(self.btnClearSearch)
+        
         # SECOND ROW
         
         self.displayLabel = QLabel("\nNOW DISPLAYING TABLE: STUDENTS")  # Create the label
@@ -116,7 +119,7 @@ class MainWindow(QWidget):
         self.my_table_widget.checkBoxCountChanged.connect(self.updateStatusLabel)
         self.btnDeselectAll.clicked.connect(lambda: self.my_table_widget.checkAllDisplayed(False))
         self.btnSelectAll.clicked.connect(lambda: self.my_table_widget.checkAllDisplayed(True))
-               
+        self.btnClearSearch.clicked.connect(self.clearSearchBar)
         # FUNCTIONALITY AND SETUP
         self.btnToggleDisplay.clicked.connect(self.toggle_display)
         self.my_table_widget.setTableContents(True)
@@ -136,7 +139,15 @@ class MainWindow(QWidget):
     def setStatus(self, message):
         self.labelStatus.setText(message)
     
-    
+    def clearSearchBar(self):
+        self.searchBarName.setText('')
+        self.searchBarIDNum.setText('')
+        self.searchCourse.setCurrentIndex(0)
+        self.searchYearLevel.setCurrentIndex(0)
+        self.searchGender.setCurrentIndex(0)
+        self.searchStatus.setCurrentIndex(0)
+        self.searchCourse.clear()
+        self.searchBarHandler()
     
     def open_student_create_dialog(self):
         dialog = StudentDialog()
