@@ -1,3 +1,8 @@
+from utils_crud import CRUDLClass
+
+cc = CRUDLClass()
+
+"""
 arr1 = ["Jupiter", "Juno", "Neptune", "Minerva", "Mars", "Venus", "Apollo", "Diana", "Vulcan", "Vesta", "Mercury", "Ceres", "Bacchus", "Pluto", "Proserpina", "Janus", "Bellona", "Fortuna", "Aurora", "Luna", "Sol", "Faunus", "Quirinus", "Tellus", "Victoria", "Lares", "Larunda", "Hercules", "Somnus", "Salacia", "Bona Dea", "Ops", "Felicitas", "Flora", "Terminus", "Pax", "Pomona", "Juventas", "Libitina", "Mors", "Fama", "Spes", "Fides", "Concordia", "Virtus", "Honos", "Invidia", "Pietas", "Aesculapius", "Dis Pater", "Aeternitas", "Annona", "Cacus", "Cardea", "Cloacina", "Decima", "Deverra", "Edesia", "Empanda", "Ferentina", "Fides Publica", "Forculus", "Inuus", "Juturna", "Levana", "Liber", "Libertas", "Lupercus", "Mellona", "Moneta", "Mutunus Tutunus", "Nascio", "Necessitas", "Nemesis", "Orbona", "Palatua", "Pales", "Parcae", "Picumnus", "Pilumnus", "Poena", "Portunes", "Postverta", "Proca", "Pudicitia", "Quiritis", "Robigo", "Rumina", "Sancus", "Sarritor", "Securitas", "Sentia", "Silvanus", "Stata Mater", "Sterquilinus", "Strenua", "Suadela", "Tacita", "Terminus", "Tiberinus", "Trivia", "Vacuna"]
 brr1 = [
     "John", "Mary", "David", "Sarah", "Michael", "Jennifer", "James", "Jessica", "Robert", "Emily",
@@ -165,3 +170,4 @@ cc = CRUDLClass()
 for number in range(250, 350):
     formatted_number = str(number).zfill(4).strip()
     cc.createStudent(studentID=f"2019-{formatted_number}", studentName=generate_random_name(), courseID=generate_random_course(), yearLevel=5, gender = generate_random_gender())
+"""

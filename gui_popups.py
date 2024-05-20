@@ -34,7 +34,6 @@ class StudentDialog(QDialog):
         self.button.clicked.connect(self.submit)
         
         # Populate combo boxes
-        courseList = []
         courses = self.crudl_class.listCourses()
         self.course_id.addItem('None')
         self.year_level.addItem('None')
@@ -42,9 +41,10 @@ class StudentDialog(QDialog):
         self.course_id.setCurrentIndex(0)
         self.year_level.setCurrentIndex(0)
         self.gender.setCurrentIndex(0)
-        for course in courses:
-            courseList.append(f"{course[0]} - {course[1]}")
-        self.course_id.addItems([str(course[0]) for course in self.crudl_class.listCourseKeys()])
+        courseList = []
+        for course in courses[1:]:
+            courseList.append(f"{course[0]}")
+        self.course_id.addItems(courseList)
         self.year_level.addItems([str(i) for i in range(1, 6)])
         self.gender.addItems(["Man", "Woman", "Non-Binary", "Other"])
 
@@ -154,8 +154,84 @@ class StudentDialog(QDialog):
         self.dialogClosed.emit() 
         super().closeEvent(event) 
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    dialog = StudentDialog(multiple = True)
-    dialog.show()
-    sys.exit(app.exec_())
+
+class CourseDialog(QDialog):
+    dialogClosed = pyqtSignal()
+    formSubmit = pyqtSignal()
+
+    def __init__(self, course_id=None, course_desc=None):
+        super().__init__()
+        self.setWindowTitle("Course Information")
+        self.setGeometry(100, 100, 400, 200)
+        with open('styles.qss', 'r') as f:
+            stylesheet = f.read()
+        self.setStyleSheet(stylesheet)
+
+        self.idIsEnabled = True if course_id else False
+        self.crudl_class = CRUDLClass(failure_action=self.printError, success_action=self.printError)
+
+        # Initialize fields as null
+        self.course_id = QLineEdit(self)
+        self.course_desc = QLineEdit(self)
+
+        # Make the button ahead
+        self.button = QPushButton("Submit", self)
+        self.button.clicked.connect(self.submit)
+
+        # Set default values and editability based on course ID
+        if course_id:
+            self.course_id.setText(course_id)
+            self.course_id.setEnabled(False)
+            self.course_id.setStyleSheet("background-color: lightgray;")
+            self.button.setText("Edit")
+        else:
+            self.course_id.setEnabled(True)
+            self.course_id.setStyleSheet("")
+            self.button.setText("Create")
+
+        if course_desc:
+            self.course_desc.setText(course_desc)
+
+        # Layout
+        layout = QGridLayout()
+        layout.addWidget(QLabel("Course ID:"), 0, 0)
+        layout.addWidget(self.course_id, 0, 1)
+        layout.addWidget(QLabel("Course Description:"), 1, 0)
+        layout.addWidget(self.course_desc, 1, 1)
+
+        # Button
+        layout.addWidget(self.button, 2, 0, 1, 2)
+
+        # Error Label
+        self.error_label = QLabel(self)
+        self.error_label.setText("")
+        self.error_label.setWordWrap(True)
+        self.error_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        layout.addWidget(self.error_label, 3, 0, 1, 2)
+
+        self.setLayout(layout)
+
+    def printError(self, message):
+        try:
+            self.error_label.setText(message)
+        except:
+            pass
+
+    def submit(self):
+        course_id = self.course_id.text()
+        course_desc = self.course_desc.text()
+
+        if not course_id:
+            self.error_label.setText("Course code cannot be blank.")
+            return
+        if not course_desc:
+            self.error_label.setText("Course description cannot be blank.")
+            return
+
+        func = self.crudl_class.updateCourse if self.idIsEnabled else self.crudl_class.createCourse
+        func(course_id, course_desc)
+        self.formSubmit.emit()
+
+    def closeEvent(self, event):
+        self.dialogClosed.emit()
+        super().closeEvent(event)

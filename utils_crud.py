@@ -124,7 +124,7 @@ class CRUDLClass:
         return int(count[0][0])
     
     def listStudentKeys(self):
-        query = "SHOW COLUMNS FROM Students;"
+        query = "SELECT * FROM Students;"
         self.cursor.execute(query)
         columns = self.cursor.fetchall()
         column_names = [column[0] for column in columns]
@@ -135,47 +135,54 @@ class CRUDLClass:
     # COURSE CRUDL
     
     def createCourse(self, courseID, courseDesc):
-        query = f"""INSERT INTO Courses VALUES ('{courseID}', '{courseDesc}')"""
-        self.executeQuery(query)
+        query = f"""INSERT INTO Courses (CourseID, CourseDesc) VALUES ('{courseID}', '{courseDesc}')"""
+        self.executeQuery(query, success_message=f"Course {courseDesc} ({courseID}) Created!")
     
     def readCourse(self, courseID):
         query = f"""SELECT * FROM Courses WHERE CourseID = '{courseID}';"""
-        self.executeQuery(query)
+        self.cursor.execute(query)
         course = self.cursor.fetchall()
-        return course
+        return course[0] if course else None
             
     def updateCourse(self, courseID, courseDesc):
         query = f"""UPDATE Courses SET CourseDesc = '{courseDesc}' WHERE CourseID = '{courseID}';"""
-        self.executeQuery(query)
+        self.executeQuery(query, success_message=f"Course {courseDesc} ({courseID}) Updated!")
         
     def deleteCourse(self, courseID):
-        query = f"UPDATE Students SET CourseID = NULL WHERE CourseID = '{courseID}';"
-        self.executeQuery(query)      
-        query = f"DELETE FROM Courses WHERE CourseID = '{courseID}';"
-        self.executeQuery(query)   
-        
-        
+        update_students_query = f"""UPDATE Students SET CourseID = NULL WHERE CourseID = '{courseID}';"""
+        self.executeQuery(update_students_query, success_message=f"All students enrolled in course {courseID} have been updated.")
+
+        delete_course_query = f"DELETE FROM Courses WHERE CourseID = '{courseID}';"
+        self.executeQuery(delete_course_query, success_message=f"Course ({courseID}) Deleted!")
+            
     def listCourses(self, searchItem=None, searchQuery=None):
-        query = f"""SELECT * FROM COURSES WHERE {searchItem} LIKE '%{searchQuery}%' """ if (searchItem and searchQuery) else """SELECT * FROM Courses;"""
-        
-        self.executeQuery(query)
+        base_query = "SELECT * FROM Courses"
+        where_clause = ""
+
+        if searchItem and searchQuery:
+            where_clause = f" WHERE {searchItem} LIKE '%{searchQuery}%'"
+
+        final_query = base_query + where_clause
+        self.cursor.execute(final_query)
         courses = self.cursor.fetchall()
-        
+
+        # Convert the first row of courses to column names
         column_names = [desc[0] for desc in self.cursor.description]
         courses.insert(0, tuple(column_names))
-        
+
         return courses
     
     def listCourseKeys(self):
-        query = "SELECT CourseID FROM Courses"
+        query = "SELECT * FROM Courses;"
         self.cursor.execute(query)
-        courseIDs = self.cursor.fetchall()
-        return courseIDs
+        columns = self.cursor.fetchall()
+        column_names = [column[0] for column in columns]
+        return column_names
     
     # COURSE HELPER FUNCTIONS
     
     def doForEachCourse(self, myFunc, searchItem=None, searchQuery=None):
-        searchItemWithQuery = f""" WHERE {searchItem} LIKE '%{searchQuery}%' """ if (searchItem and searchQuery) else None
+        searchItemWithQuery = f""" WHERE {searchItem} LIKE '%{searchQuery}%' """ if (searchItem and searchQuery) else ""
         
         query = f"""SELECT * FROM Courses {searchItemWithQuery} ORDER BY CourseID"""
         self.cursor.execute(query)

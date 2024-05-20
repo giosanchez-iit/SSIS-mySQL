@@ -3,17 +3,17 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QCo
 from PyQt5.QtWidgets import QHBoxLayout, QSpacerItem,QLineEdit, QSizePolicy, QLabel, QFrame
 from PyQt5.QtCore import Qt, QRect
 from gui_table import MyTableWidget
-from gui_popups import StudentDialog
+from gui_popups import StudentDialog, CourseDialog
 from utils_crud import CRUDLClass
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.init_ui()
-        self.displayModeIsStudent = True
         self.student_dialog = None
 
     def init_ui(self):
+        self.displayModeIsStudent = True
         self.cc = CRUDLClass()
         self.setMouseTracking(True)
         
@@ -111,12 +111,12 @@ class MainWindow(QWidget):
         
         # SIGNALS
         self.btnAddItem.clicked.connect(self.open_student_create_dialog)
-        self.btnDeleteItem.clicked.connect(self.open_student_delete_dialog)
         self.btnEditItem.clicked.connect(self.open_student_edit_dialog)
+        self.btnDeleteItem.clicked.connect(self.open_delete_dialog)
         self.my_table_widget.checkBoxCountChanged.connect(self.updateStatusLabel)
         self.btnDeselectAll.clicked.connect(lambda: self.my_table_widget.checkAllDisplayed(False))
         self.btnSelectAll.clicked.connect(lambda: self.my_table_widget.checkAllDisplayed(True))
-        
+               
         # FUNCTIONALITY AND SETUP
         self.btnToggleDisplay.clicked.connect(self.toggle_display)
         self.my_table_widget.setTableContents(True)
@@ -135,7 +135,9 @@ class MainWindow(QWidget):
         
     def setStatus(self, message):
         self.labelStatus.setText(message)
-     
+    
+    
+    
     def open_student_create_dialog(self):
         dialog = StudentDialog()
         dialog.dialogClosed.connect(self.refreshTable)
@@ -160,7 +162,7 @@ class MainWindow(QWidget):
         dialog.formSubmit.connect(self.refreshTable)
         dialog.exec()
         
-    def open_student_delete_dialog(self):
+    def open_delete_dialog(self):
         self.setStatus(self.my_table_widget.deleteSelectedItems(self.displayModeIsStudent))
         self.refreshTable()
 
@@ -205,6 +207,7 @@ class MainWindow(QWidget):
         self.updateStatusLabel()
         
     def toggle_display(self):
+        incc = CRUDLClass()
         self.displayModeIsStudent = not self.displayModeIsStudent
         self.searchBarName.setText('')
         self.searchBarIDNum.setText('')
@@ -213,15 +216,22 @@ class MainWindow(QWidget):
         self.searchGender.setCurrentIndex(0)
         self.searchStatus.setCurrentIndex(0)
         self.searchCourse.clear()
+        courses = incc.listCourseKeys()
+        courseList = []
+        courseList.append("No Course Specified")
+        for course in courses:
+            print("Courses fetched:", course)
+            courseList.append(f"{course}")
+        courseList.pop(1) 
+        self.searchCourse.addItems(courseList)
+        self.btnEditItem.clicked.disconnect()
+        self.btnDeleteItem.clicked.disconnect()
+        self.btnAddItem.clicked.disconnect()
         if self.displayModeIsStudent:
+            self.btnEditItem.clicked.connect(self.open_student_edit_dialog)
+            self.btnDeleteItem.clicked.connect(self.open_delete_dialog)
+            self.btnAddItem.clicked.connect(self.open_student_create_dialog)
             self.btnToggleDisplay.setText('Display Courses')
-            courses = self.cc.listCourses()
-            courseList = []
-            courseList.append("No Course Specified")
-            for course in courses:
-                courseList.append(f"{course[0]}")
-            courseList.pop(1) 
-            self.searchCourse.addItems(courseList)
             self.setStatus('Now Displaying Students')
             self.displayLabel.setText("\nNOW DISPLAYING TABLE: STUDENTS")
             self.btnAddItem.setText("+ ADD STUDENT")
@@ -237,6 +247,9 @@ class MainWindow(QWidget):
             self.btnSelectAll.setVisible(True)
             self.btnDeselectAll.setVisible(True)
         else:
+            self.btnEditItem.clicked.connect(self.open_course_edit_dialog)
+            self.btnDeleteItem.clicked.connect(self.open_delete_dialog)
+            self.btnAddItem.clicked.connect(self.open_course_create_dialog)
             self.btnToggleDisplay.setText('Display Students')
             self.setStatus('Now Displaying Courses')
             self.displayLabel.setText("\nNOW DISPLAYING TABLE: COURSES")
@@ -289,7 +302,7 @@ class MainWindow(QWidget):
         count = self.my_table_widget.countCheckedBoxes()
         if count == 0:
             item_type = "student" if self.displayModeIsStudent else "course"
-            self.setStatus("No items selected")
+            self.setStatus(f"No {item_type}s selected")
             self.btnEditItem.setText(f"- EDIT {item_type.upper()}")
             self.btnEditItem.setStyleSheet("background-color: lightgray;")
             self.btnEditItem.setEnabled(False)
@@ -314,7 +327,36 @@ class MainWindow(QWidget):
             self.btnDeleteItem.setText(f"x DELETE {item_type.upper()}")
             self.btnDeleteItem.setStyleSheet("")
             self.btnDeleteItem.setEnabled(True)
+            if not self.displayModeIsStudent:
+                self.btnEditItem.setText(f"- EDIT COURSE")
+                self.btnEditItem.setStyleSheet("background-color: lightgray;")
+                self.btnEditItem.setEnabled(False)
+            
+    def open_course_create_dialog(self):
+        dialog = CourseDialog()
+        dialog.dialogClosed.connect(self.refreshTable)
+        dialog.formSubmit.connect(self.refreshTable)
+        dialog.exec()
 
+    def open_course_edit_dialog(self):
+        selected_courses = self.my_table_widget.getCheckedKeys()
+        if not selected_courses:
+            self.setStatus("No courses selected")
+            return
+        if len(selected_courses) == 1:
+            course_id = selected_courses[0]
+            data = self.cc.readCourse(course_id)
+            if data is not None: 
+                dialog = CourseDialog(course_id=data[0], course_desc=data[1])
+            else:
+                self.setStatus("Failed to load course data")
+        else:
+            self.setStatus("Cannot edit multiple courses at once")
+
+
+        dialog.dialogClosed.connect(self.refreshTable)
+        dialog.formSubmit.connect(self.refreshTable)
+        dialog.exec()
                 
         
         
